@@ -14,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import digi.recipeManager.Metrics.Graph;
 import digi.recipeManager.data.*;
 
-
 /**
  * RecipeManager's main class which is also the static pointer for the API.<br>
  * <b>You should NOT create a new instance of this class! Access it staticly.</b>
