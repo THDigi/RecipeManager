@@ -1,0 +1,36 @@
+name: RecipeManager
+description: Add, edit or remove recipes and fuels
+version: 1.23d
+author: Digi
+website: http://dev.bukkit.org/server-mods/recipemanager/
+main: digi.recipeManager.RecipeManager
+softdepend: [Vault, iConomy]
+commands:
+  rmrecipes:
+    aliases: [recipe, recipes]
+    description: search recipes that make item or use item if 'i' is specified
+    usage: /<command> item i
+    permission: recipemanager.view
+  rmcheck:
+    aliases: [checkrecipes]
+    description: check recipe file for errors
+    usage: /<command>
+    permission: recipemanager.admin
+  rmreload:
+    aliases: [reloadrecipes]
+    description: reload all settings, aliases, language file and recipe files
+    usage: /<command>
+    permission: recipemanager.admin
+permissions:
+  recipemanager.craft:
+    description: Control for all recipes
+    default: true
+  recipemanager.view:
+    description: View the recipe list
+    default: true
+  recipemanager.admin:
+    description: Access to the admin commands
+    default: op
+  recipemanager.noworld:
+    description: Ignore world restrictions
+    default: false

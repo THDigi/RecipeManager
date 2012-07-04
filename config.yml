@@ -1,0 +1,69 @@
+# RecipeManager configuration
+# Consult readme.txt file for information about recipes
+
+
+# What to do for the existing recipes, acceptable values:
+#   replace - remove all default minecraft and replace them with the ones from the "default" folder (default)
+#   clear - same as "replace" only it removes *ALL* recipes (including ones made by other plugins/mods)
+#   nothing - do not mess with any existing recipes, it also ignores the "default" folder to avoid problems
+existing-recipes: replace
+
+
+# Enable or disable weapon/tool repair recipes.
+# This is a separate option because repair recipes are not actual recipes and are handled differently
+#   default: true
+repair-recipes: true
+
+
+# Enable or disable weapon/tool repairing preserving enchantments
+# If both items have enchantments, the first item's enchantments will be preserved (crafting matrix order)
+#   default: false
+repair-enchanted: false
+
+
+# Enable or disable colored log messages
+#   default true
+color-console: true
+
+
+# Return empty item when used in a recipe
+return-empty:
+  buckets: true        # water/lava/milk bucket -> empty bucket (default behaviour of MC)
+  potions: true        # any potion -> empty bottle
+  bowl: true           # mushroom soup -> bowl
+#   all default: true
+
+
+# Return empty bucket when water/lava/milk bucket is used as a fuel in furnace
+#   default true
+fuel-return-buckets: true
+
+
+# When Shift+Clicking an item in the inventory while a furnace is opened, where should the item go ?
+# Values for this setting:
+#   fuel - if item is a fuel, will go in fuel slot, otherwise in the ingredient slot (default, like vaniila MC) NOTE: it can get confusing when creating fuels with items that are also ingredients.
+#   click - click type determins where the item should go, Shift+LeftClick to ingredient slot and Shift+RightClick to fuel slot.
+furnace-shift-click: fuel
+
+
+# Ticks that the furnace task runs at, 20 ticks is 1 second.
+# Use 2 or more if you have a very slow server OR alot of burning furnaces at once cause lag.
+#   default: 1
+furnace-ticks: 1
+
+
+# Compatibility configuration, if you have problems with other plugins, mods or just server bugs, you can disable certain events.
+# Disabling events will disable certain features of this plugin!
+#   all default: true
+compatibility:
+  chunk-events: true # disabling chunk load events will also disable furnace recipes custom smelting time - helps with chunk load errors
+
+
+# Enable or disable metrics system for this specific plugin, it will also not create the PluginMetrics folder if this is disabled, but other plugins can use metrics if they have it implemented.
+#   default: true
+metrics: true
+
+
+# --------------------------------------------------------------------------------------------------------------
+# DO NOT change this value - it helps plugin to inform you if this file has new options from latest updates!
+lastchanged: 1.23c
