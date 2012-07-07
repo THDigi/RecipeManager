@@ -817,7 +817,7 @@ public class Events implements Listener
 				furnaceStop.remove(locString);
 				recipes.furnaceData.remove(locString);
 				
-				if(settings.COMPATIBILITY_CHUNKEVENTS)
+				if(settings.COMPATIBILITY_CHUNKEVENTS && recipes.furnaceSmelting != null)
 					recipes.furnaceSmelting.remove(locString);
 				
 				break;
@@ -856,7 +856,7 @@ public class Events implements Listener
 	
 	private void furnaceChunk(Chunk chunk, boolean add)
 	{
-		if(chunk == null)
+		if(chunk == null || recipes.furnaceSmelting == null)
 			return;
 		
 		BlockState tileEnts[] = chunk.getTileEntities();

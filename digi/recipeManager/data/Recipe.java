@@ -324,7 +324,7 @@ public class Recipe
 	
 	public boolean isUsableExp(Player player, boolean printMessages)
 	{
-		int playerExp = new ExpManager(player).getCurrentExp();
+		int playerExp = new ExperienceManager(player).getCurrentExp();
 //		int playerExp = player.getTotalExperience();
 		
 		boolean usable = true;
@@ -607,7 +607,7 @@ public class Recipe
 		if(player == null || giveExp == null || giveExp.getValue() == 0)
 			return;
 		
-		new ExpManager(player).addExp(giveExp.getValue());
+		new ExperienceManager(player).changeExp(giveExp.getValue());
 		
 		/* inaccurate
 		if(giveExp.getValue() < 0)

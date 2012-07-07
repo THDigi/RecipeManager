@@ -38,8 +38,8 @@ public class RecipeManager extends JavaPlugin
 	protected static Recipes		recipes;
 	protected static Econ			economy;
 	protected static Permissions	permissions;
+	protected static Events			events;
 	private static Metrics			metrics;
-	private static Events			events;
 	
 	/**
 	 * <b>You should NOT trigger this manually!</b>
@@ -267,20 +267,25 @@ public class RecipeManager extends JavaPlugin
 		if(settings.COMPATIBILITY_CHUNKEVENTS)
 		{
 			if(recipes.furnaceSmelting == null)
-				recipes.furnaceSmelting = new HashMap<String, Double>();
-			
-			for(World world : Bukkit.getServer().getWorlds())
 			{
-				events.worldLoad(world);
+				recipes.furnaceSmelting = new HashMap<String, Double>();
+				
+				for(World world : Bukkit.getServer().getWorlds())
+				{
+					events.worldLoad(world);
+				}
 			}
 		}
 		else
 		{
-			recipes.furnaceSmelting = null;
-			
-			ChunkLoadEvent.getHandlerList().unregister(events);
-			ChunkUnloadEvent.getHandlerList().unregister(events);
-			WorldLoadEvent.getHandlerList().unregister(events);
+			if(recipes.furnaceSmelting != null)
+			{
+				recipes.furnaceSmelting = null;
+				
+				ChunkLoadEvent.getHandlerList().unregister(events);
+				ChunkUnloadEvent.getHandlerList().unregister(events);
+				WorldLoadEvent.getHandlerList().unregister(events);
+			}
 		}
 		
 		// Apply item return items

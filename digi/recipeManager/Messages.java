@@ -197,7 +197,7 @@ public enum Messages
 	 */
 	public static void printMessage(CommandSender sender, String message)
 	{
-		sender.sendMessage(replaceColorCodes(message, (!RecipeManager.getSettings().COLOR_CONSOLE && sender instanceof ConsoleCommandSender)));
+		sender.sendMessage(replaceColorCodes((sender instanceof ConsoleCommandSender ? "[RecipeManager] " + message : message), (!RecipeManager.getSettings().COLOR_CONSOLE && sender instanceof ConsoleCommandSender)));
 	}
 	
 	private static String replaceColorCodes(String message, boolean noColors)
@@ -250,6 +250,6 @@ public enum Messages
 	 */
 	public static void log(String message)
 	{
-		printMessage(Bukkit.getConsoleSender(), "[RecipeManager] " + message);
+		printMessage(Bukkit.getConsoleSender(), message);
 	}
 }

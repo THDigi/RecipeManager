@@ -14,6 +14,7 @@ import org.bukkit.block.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.world.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.*;
@@ -489,11 +490,20 @@ public class Recipes
 		
 		if(!simulation)
 		{
+			int loaded[] = new int[]
+			{
+				craftRecipes.size(),
+				combineRecipes.size(),
+				smeltRecipes.size(),
+				fuels.size()
+			};
+			
 			log.fine("Total loaded:");
-			log.fine("  " + craftRecipes.size() + " crafting recipes");
-			log.fine("  " + combineRecipes.size() + " combining recipes");
-			log.fine("  " + smeltRecipes.size() + " smelting recipes");
-			log.fine("  " + fuels.size() + " fuels");
+			log.fine("  " + loaded[0] + " crafting recipes");
+			log.fine("  " + loaded[1] + " combining recipes");
+			log.fine("  " + loaded[2] + " smelting recipes");
+			log.fine("  " + loaded[3] + " fuels");
+			Messages.log(ChatColor.GREEN + "Loaded " + (loaded[0] + loaded[1] + loaded[2] + loaded[3]) + " custom recipes in total.");
 			
 			// restart furnace task if any custom time smelt recipes exist
 			
@@ -507,12 +517,20 @@ public class Recipes
 						furnaceSmelting = new HashMap<String, Double>();
 					
 					if(furnaceTaskId <= 0)
+					{
 						furnaceTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(RecipeManager.getPlugin(), new FurnacesTask(RecipeManager.getSettings().FURNACE_TICKS), 0, RecipeManager.getSettings().FURNACE_TICKS);
+						
+						Bukkit.getPluginManager().registerEvents(RecipeManager.events, RecipeManager.plugin);
+					}
 				}
 				else
 				{
-					furnaceSmelting = null;
 					cancelTask = true;
+					furnaceSmelting = null;
+					
+					ChunkLoadEvent.getHandlerList().unregister(RecipeManager.events);
+					ChunkUnloadEvent.getHandlerList().unregister(RecipeManager.events);
+					WorldLoadEvent.getHandlerList().unregister(RecipeManager.events);
 				}
 			}
 			
