@@ -14,7 +14,6 @@ import org.bukkit.block.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.world.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.*;
@@ -517,20 +516,12 @@ public class Recipes
 						furnaceSmelting = new HashMap<String, Double>();
 					
 					if(furnaceTaskId <= 0)
-					{
 						furnaceTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(RecipeManager.getPlugin(), new FurnacesTask(RecipeManager.getSettings().FURNACE_TICKS), 0, RecipeManager.getSettings().FURNACE_TICKS);
-						
-						Bukkit.getPluginManager().registerEvents(RecipeManager.events, RecipeManager.plugin);
-					}
 				}
 				else
 				{
 					cancelTask = true;
 					furnaceSmelting = null;
-					
-					ChunkLoadEvent.getHandlerList().unregister(RecipeManager.events);
-					ChunkUnloadEvent.getHandlerList().unregister(RecipeManager.events);
-					WorldLoadEvent.getHandlerList().unregister(RecipeManager.events);
 				}
 			}
 			
