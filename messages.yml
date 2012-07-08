@@ -76,11 +76,11 @@ command:
 
   rmreload:
     reloading: <white>Reloading all settings, recipes and language file...
-    done: <green>Everything loaded succesfully.
+    done: <green>Everything reloaded succesfully, now there are {recipes} recipes.
     errors: <red>There were errors processing the files, check server log!
 
 
 
 # --------------------------------------------------------------------------------------------------------------
 # DO NOT change this value - it helps plugin to inform you if this file has new options from latest updates!
-lastchanged: 1.22c
+lastchanged: 1.23d

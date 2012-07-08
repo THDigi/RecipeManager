@@ -366,7 +366,15 @@ class CmdReload implements CommandExecutor
 		}
 		
 		if(RecipeManager.getRecipes().loadRecipes(false))
-			Messages.COMMAND_RMRELOAD_DONE.print(sender);
+		{
+			Messages.COMMAND_RMRELOAD_DONE.print(sender, null, new String[][]
+			{
+				{
+					"{recipes}",
+					"" + (RecipeManager.getRecipes().getCraftRecipes().size() + RecipeManager.getRecipes().getCombineRecipes().size() + RecipeManager.getRecipes().getSmeltRecipes().size() + RecipeManager.getRecipes().getFuels().size())
+				}
+			});
+		}
 		else if(sender instanceof Player)
 			Messages.COMMAND_RMRELOAD_ERRORS.print(sender);
 		

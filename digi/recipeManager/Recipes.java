@@ -3,7 +3,7 @@ package digi.recipeManager;
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import net.minecraft.server.*;
 
@@ -401,9 +401,23 @@ public class Recipes
 		// remove furnace recipes, easy.
 		FurnaceRecipes.getInstance().recipies.keySet().removeAll(new FurnaceRecipes().recipies.keySet());
 		
+		Logger logger = Logger.getLogger("Minecraft");
+		Filter oldFilter = logger.getFilter();
+		
+		logger.setFilter(new Filter()
+		{
+			@Override
+			public boolean isLoggable(LogRecord log)
+			{
+				return !log.getMessage().endsWith(" recipes");
+			}
+		});
+		
 		// remove workbench recipes, not so easy...
 		List workbenchRaw = new CraftingManager().recipies;
 		List<String> workbench = new ArrayList<String>();
+		
+		logger.setFilter(oldFilter);
 		
 		for(Object raw : workbenchRaw)
 		{
@@ -441,8 +455,22 @@ public class Recipes
 	@SuppressWarnings("unchecked")
 	public void restoreDefaultRecipes()
 	{
+		Logger logger = Logger.getLogger("Minecraft");
+		Filter oldFilter = logger.getFilter();
+		
+		logger.setFilter(new Filter()
+		{
+			@Override
+			public boolean isLoggable(LogRecord log)
+			{
+				return !log.getMessage().endsWith(" recipes");
+			}
+		});
+		
 		FurnaceRecipes.getInstance().recipies.putAll(new FurnaceRecipes().recipies);
 		CraftingManager.getInstance().recipies.addAll(new CraftingManager().recipies);
+		
+		logger.setFilter(oldFilter);
 	}
 	
 	protected boolean loadRecipes(boolean simulation)
@@ -489,20 +517,11 @@ public class Recipes
 		
 		if(!simulation)
 		{
-			int loaded[] = new int[]
-			{
-				craftRecipes.size(),
-				combineRecipes.size(),
-				smeltRecipes.size(),
-				fuels.size()
-			};
-			
 			log.fine("Total loaded:");
-			log.fine("  " + loaded[0] + " crafting recipes");
-			log.fine("  " + loaded[1] + " combining recipes");
-			log.fine("  " + loaded[2] + " smelting recipes");
-			log.fine("  " + loaded[3] + " fuels");
-			Messages.log(ChatColor.GREEN + "Loaded " + (loaded[0] + loaded[1] + loaded[2] + loaded[3]) + " custom recipes in total.");
+			log.fine("  " + craftRecipes.size() + " crafting recipes");
+			log.fine("  " + combineRecipes.size() + " combining recipes");
+			log.fine("  " + smeltRecipes.size() + " smelting recipes");
+			log.fine("  " + fuels.size() + " fuels");
 			
 			// restart furnace task if any custom time smelt recipes exist
 			

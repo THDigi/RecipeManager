@@ -1,12 +1,14 @@
 == Change log ==
 
 === v1.23d ===
+++Changed files: messages.yml++
 * Fixed errors when using furnace and there are no custom-time smelting recipes
 * Fixed "rmreload" not removing removed furnace recipes
 * Added API method isCustomRecipe(recipe) that also checks if recipe is a furnace recipe (which isCustomRecipe(result) did NOT)
 * Fixed API method removeCustomRecipes() not removing custom furnace recipes
 * Fixed some java heap errors by updating the 3rd party ExperienceManager class
-* Added printing of how many recipes were loaded in total to remove confusion about the unblockable "182 recipes" message triggered by the server
+* Blocked the "182 recipes" message that was sent by the server which confused people about loaded recipes
+* Changed "command.rmreload.done" message node to display the number of recipes loaded.
 
 \\
 

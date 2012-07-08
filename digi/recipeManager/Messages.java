@@ -65,7 +65,7 @@ public enum Messages
 	COMMAND_RMCHECK_ERRORS("command.rmcheck.errors", "<red>There were errors processing the files, check server log!"),
 	
 	COMMAND_RMRELOAD_RELOADING("command.rmreload.reloading", "<white>Reloading all settings, recipes and language file..."),
-	COMMAND_RMRELOAD_DONE("command.rmreload.done", "<green>Everything loaded succesfully."),
+	COMMAND_RMRELOAD_DONE("command.rmreload.done", "<green>Everything reloaded succesfully, now there are {recipes} recipes."),
 	COMMAND_RMRELOAD_ERRORS("command.rmreload.errors", "<red>There were errors processing the files, check server log!");
 	
 	private String						path;
