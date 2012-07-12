@@ -22,6 +22,12 @@ public class ItemData implements Serializable
 		this.data = data;
 	}
 	
+	public ItemData(Item item)
+	{
+		type = item.getType();
+		data = item.getData();
+	}
+	
 	public ItemData(ItemStack item)
 	{
 		type = item.getTypeId();

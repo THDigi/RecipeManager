@@ -1,8 +1,9 @@
 name: RecipeManager
 description: Add, edit or remove recipes and fuels
-version: 1.23d
+version: 1.23e
 author: Digi
 website: http://dev.bukkit.org/server-mods/recipemanager/
+dev-url: http://dev.bukkit.org/server-mods/recipemanager/
 main: digi.recipeManager.RecipeManager
 softdepend: [Vault, iConomy]
 commands:

@@ -686,6 +686,11 @@ public class Recipes
 		recipeErrors.add("(" + currentFile + ":" + currentFileLine + ") " + error);
 	}
 	
+	protected ItemData processItemData(String string, int defaultData, boolean allowData, boolean printRecipeErrors)
+	{
+		return new ItemData(processItem(string, defaultData, allowData, false, false, printRecipeErrors));
+	}
+	
 	protected Item processItem(String string, int defaultData, boolean allowData, boolean allowAmount, boolean allowEnchantments, boolean printRecipeErrors)
 	{
 		string = string.trim();
@@ -696,11 +701,6 @@ public class Recipes
 		String itemString[] = string.split("\\|");
 		String stringArray[] = itemString[0].trim().split(":");
 		
-		Material mat = null;
-		int type = 0;
-		int data = defaultData;
-		int amount = 1;
-		
 		if(stringArray.length <= 0 || stringArray[0].isEmpty())
 			return new Item(0);
 		
@@ -710,7 +710,7 @@ public class Recipes
 		if(alias != null)
 			return processItem(string.replace(stringArray[0], alias), defaultData, allowData, allowAmount, allowEnchantments, printRecipeErrors);
 		
-		mat = Material.matchMaterial(stringArray[0]);
+		Material mat = Material.matchMaterial(stringArray[0]);
 		
 		if(mat == null)
 		{
@@ -720,10 +720,12 @@ public class Recipes
 			return null;
 		}
 		
-		type = mat.getId();
+		int type = mat.getId();
 		
 		if(type <= 0)
 			return new Item(0);
+		
+		int data = defaultData;
 		
 		if(stringArray.length > 1)
 		{
@@ -745,6 +747,8 @@ public class Recipes
 			else if(printRecipeErrors)
 				recipeError("Item '" + mat + "' can't have data value defined in this recipe's slot, data value ignored.");
 		}
+		
+		int amount = 1;
 		
 		if(stringArray.length > 2)
 		{
@@ -898,8 +902,7 @@ public class Recipes
 			{
 				// splitting line by ">" char to get leftover item (if any)
 //				itemSplit = split[i].split(">");
-				
-				itemData = processItem(split[i] /*itemSplit[0]*/, -1, true, false, false, true);
+				itemData = processItemData(split[i] /*itemSplit[0]*/, -1, true, true);
 				
 				if(itemData == null)
 				{
@@ -1067,7 +1070,7 @@ public class Recipes
 		Item result = results.get(0);
 		
 		// TODO: revert allowData to true when data values for furnaces have been fixed
-		Item ingredient = processItem(split[0], -1, false, false, false, true);
+		ItemData ingredient = processItemData(split[0], -1, false, true);
 		double minTime = -1.0;
 		double maxTime = -1.0;
 		
@@ -1128,7 +1131,7 @@ public class Recipes
 		if(timeSplit.length >= 2)
 			maxTime = Math.max(Integer.valueOf(timeSplit[1]), maxTime);
 		
-		ItemData ingredient = processItem(split[0], -1, true, false, false, true);
+		ItemData ingredient = (ItemData)processItem(split[0], -1, true, false, false, true);
 		
 		if(ingredient == null || ingredient.getType() == 0)
 			return "Invalid item: '" + ingredient + "'";

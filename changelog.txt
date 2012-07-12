@@ -1,5 +1,9 @@
 == Change log ==
 
+=== v1.23e ===
+* Changed interaction with vault on adding/removing money to not use negative values, instead use the propper add or subtract methods
+* Improved memory performance a bit
+
 === v1.23d ===
 ++Changed files: messages.yml++
 * Fixed errors when using furnace and there are no custom-time smelting recipes
