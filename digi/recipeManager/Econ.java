@@ -116,8 +116,18 @@ public class Econ
 			return;
 		
 		if(vaultEcon != null)
-			vaultEcon.depositPlayer(playerName, amount);
+		{
+			if(amount > 0)
+				vaultEcon.depositPlayer(playerName, amount);
+			else
+				vaultEcon.withdrawPlayer(playerName, Math.abs(amount));
+		}
 		else if(iConomyEcon != null)
-			iConomyEcon.get(playerName).getHoldings().add(amount);
+		{
+			if(amount > 0)
+				iConomyEcon.get(playerName).getHoldings().add(amount);
+			else
+				iConomyEcon.get(playerName).getHoldings().subtract(Math.abs(amount));
+		}
 	}
 }
