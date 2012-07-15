@@ -269,7 +269,7 @@ public class Events implements Listener
 					int repair[] = new int[2];
 					int repairIndex = 0;
 					
-					for(int i = 0; i < matrix.length; i++)
+					for(int i = 1; i < matrix.length; i++)
 					{
 						if(matrix[i] != null && matrix[i].getTypeId() != 0)
 						{
