@@ -324,6 +324,9 @@ public class Recipe
 	
 	public boolean isUsableExp(Player player, boolean printMessages)
 	{
+		if(player == null)
+			return true;
+		
 		int playerExp = new ExperienceManager(player).getCurrentExp();
 //		int playerExp = player.getTotalExperience();
 		
@@ -382,6 +385,9 @@ public class Recipe
 	
 	public boolean isUsableLevel(Player player, boolean printMessages)
 	{
+		if(player == null)
+			return true;
+		
 		int playerLevel = player.getLevel();
 		
 		boolean usable = true;
@@ -439,7 +445,7 @@ public class Recipe
 	
 	public boolean isUsableMoney(Player player, boolean printMessages)
 	{
-		if(!RecipeManager.getEconomy().isEnabled())
+		if(player == null || !RecipeManager.getEconomy().isEnabled())
 			return true;
 		
 		double playerMoney = RecipeManager.getEconomy().getMoney(player.getName());
@@ -573,6 +579,9 @@ public class Recipe
 	 */
 	public boolean isUsableBy(Player player, boolean printMessages)
 	{
+		if(player == null)
+			return true;
+		
 		return (isUsablePermissions(player, printMessages) && isUsableGroups(player, printMessages) && isUsableWorlds(player, printMessages) && isUsableExp(player, printMessages) && isUsableLevel(player, printMessages) && isUsableMoney(player, printMessages));
 	}
 	

@@ -1,8 +1,11 @@
 == Change log ==
 
 === v1.23e ===
+* Fixed "User not online" error on non-player crafting caused by server mods
 * Changed interaction with vault on adding/removing money to not use negative values, instead use the propper add or subtract methods
 * Improved memory performance a bit
+
+\\
 
 === v1.23d ===
 ++Changed files: messages.yml++

@@ -2,7 +2,6 @@ package digi.recipeManager.data;
 
 import java.util.Arrays;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 /**
@@ -15,18 +14,15 @@ import org.bukkit.entity.Player;
  */
 public class ExperienceManager
 {
-	// this is to stop the lookup tables growing without control
-	private static int		hardMaxLevel	= 100000;
+	private static int		hardMaxLevel	= 100000;	// this is to stop the lookup tables growing without control
 	private static int		xpRequiredForNextLevel[];
 	private static int		xpTotalToReachLevel[];
 	
-	private final String	playerName;
+	private final Player	player;
 	
 	static
 	{
-		// 25 is an arbitrary value for the initial table size - the actual value isn't critically
-		// important since the tables are resized as needed.
-		initLookupTables(25);
+		initLookupTables(5);
 	}
 	
 	public static int getHardMaxLevel()
@@ -95,25 +91,7 @@ public class ExperienceManager
 	 */
 	public ExperienceManager(Player player)
 	{
-		playerName = player.getName();
-//		getPlayer();	// ensure it's a valid player name
-	}
-	
-	/**
-	 * Get the Player associated with this ExperienceManager.
-	 * 
-	 * @return the Player object
-	 * @throws IllegalStateException
-	 *             if the player is no longer online
-	 */
-	public Player getPlayer()
-	{
-		Player p = Bukkit.getPlayer(playerName);
-		
-		if(p == null)
-			throw new IllegalStateException("Player " + playerName + " is not online");
-		
-		return p;
+		this.player = player;
 	}
 	
 	/**
@@ -146,7 +124,6 @@ public class ExperienceManager
 		if(xp < 0)
 			xp = 0;
 		
-		Player player = getPlayer();
 		int curLvl = player.getLevel();
 		int newLvl = getLevelForExp(xp);
 		
@@ -164,7 +141,6 @@ public class ExperienceManager
 	 */
 	public int getCurrentExp()
 	{
-		Player player = getPlayer();
 		int lvl = player.getLevel();
 		return getXpForLevel(lvl) + (int)(xpRequiredForNextLevel[lvl] * player.getExp());
 	}

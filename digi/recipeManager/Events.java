@@ -322,7 +322,7 @@ public class Events implements Listener
 				
 				ItemStack result = null;
 				
-				if(player == null || recipe.isUsableBy(player, true))
+				if(recipe.isUsableBy(player, true))
 					result = recipe.getResults().get(0).getItemStack(); // Display the first result item
 					
 				RecipeManagerPreCraftEvent callEvent = new RecipeManagerPreCraftEvent(recipe, result, player);
@@ -341,7 +341,7 @@ public class Events implements Listener
 				
 				ItemStack result = null;
 				
-				if(player == null || recipe.isUsableBy(player, true))
+				if(recipe.isUsableBy(player, true))
 					result = recipe.getResults().get(0).getItemStack(); // Display the first result item
 					
 				RecipeManagerPreCraftEvent callEvent = new RecipeManagerPreCraftEvent(recipe, result, player);
