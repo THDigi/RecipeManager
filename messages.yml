@@ -25,6 +25,10 @@ craft:
   warndistance: <dark_green>Recipe will only work as long as you're within {distance} blocks from the furnace!
   warnonline: <dark_green>Recipe will only work as long as you're online in the server!
 
+  explode: <dark_green>Recipe exploded! <gray>(<white>{chance} chance of explosion<gray>)
+  explodeonsuccess: <dark_green>Recipe exploded! <gray>(<white>{chance} chance of explosion when recipe works<gray>)
+  explodeonfailure: <dark_red>Recipe exploded! <gray>(<white>{chance} chance of explosion when recipe fails<gray>)
+
   giveexp: <green>Got {amount} experience<dark_green> for crafting recipe.
   takeexp: <gold>Lost {amount} experience<dark_red> for crafting recipe.
   costexp: <dark_red>Recipe <gold>costs {amount} experience<dark_red> to craft it!
@@ -83,4 +87,4 @@ command:
 
 # --------------------------------------------------------------------------------------------------------------
 # DO NOT change this value - it helps plugin to inform you if this file has new options from latest updates!
-lastchanged: 1.23d
+lastchanged: 1.24

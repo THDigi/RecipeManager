@@ -1,6 +1,6 @@
 package digi.recipeManager.data;
 
-import java.util.Set;
+import java.util.*;
 
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -14,6 +14,7 @@ public class Recipe
 	private Flag<Set<String>>	groups		= null;
 	private Flag<Set<String>>	worlds		= null;
 	private Flag<Integer>		proximity	= null;
+	private Flag<int[]>			explode		= null;
 	private Set<String>			commands	= null;
 	private Set<String>			messages	= null;
 	private Flag<Integer>		giveExp		= null;
@@ -38,6 +39,7 @@ public class Recipe
 		groups = recipe.groups;
 		worlds = recipe.worlds;
 		proximity = recipe.proximity;
+		explode = recipe.explode;
 		commands = recipe.commands;
 		messages = recipe.messages;
 		giveExp = recipe.giveExp;
@@ -112,6 +114,16 @@ public class Recipe
 	public Flag<Integer> getProximity()
 	{
 		return proximity;
+	}
+	
+	public void setExplode(Flag<int[]> explode)
+	{
+		this.explode = explode;
+	}
+	
+	public Flag<int[]> getExplode()
+	{
+		return explode;
 	}
 	
 	public void setCommands(Set<String> commands)
@@ -613,7 +625,7 @@ public class Recipe
 	 */
 	public void affectExp(Player player)
 	{
-		if(player == null || giveExp == null || giveExp.getValue() == 0)
+		if(giveExp == null || giveExp.getValue() == 0 || player == null)
 			return;
 		
 		new ExperienceManager(player).changeExp(giveExp.getValue());
@@ -647,7 +659,7 @@ public class Recipe
 	 */
 	public void affectLevel(Player player)
 	{
-		if(player == null || giveLevel == null || giveLevel.getValue() == 0)
+		if(giveLevel == null || giveLevel.getValue() == 0 || player == null)
 			return;
 		
 		player.setLevel(player.getLevel() + giveLevel.getValue());
@@ -668,7 +680,7 @@ public class Recipe
 	 */
 	public void affectMoney(Player player)
 	{
-		if(player == null || giveMoney == null || giveMoney.getValue() == 0 || !RecipeManager.getEconomy().isEnabled())
+		if(giveMoney == null || giveMoney.getValue() == 0 || player == null || !RecipeManager.getEconomy().isEnabled())
 			return;
 		
 		RecipeManager.getEconomy().giveMoney(player.getName(), giveMoney.getValue());
@@ -686,13 +698,74 @@ public class Recipe
 		});
 	}
 	
-	private String replaceVariables(String data, Player player, ItemData ingredient, Item result)
+	/**
+	 * Applies the "@explode" flag of the recipe to the block if the flag is present
+	 * 
+	 * @param player
+	 *            who to send the message to
+	 * @param location
+	 *            furnace/workbench location for explosion
+	 * @param success
+	 *            if recipe was a success or not
+	 */
+	public void explode(Player player, Location location, boolean success)
 	{
-		data = data.replaceAll("\\{player\\}", (player == null ? "(nobody)" : player.getName()));
-		data = data.replaceAll("\\{ingredient\\}", (ingredient == null ? "nothing" : result.printItemData()));
-		data = data.replaceAll("\\{result\\}", (result == null ? "nothing" : result.printItemData()));
+		explode(player, location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), success);
+	}
+	
+	/**
+	 * Applies the "@explode" flag of the recipe to the block if the flag is present
+	 * 
+	 * @param player
+	 *            who to send the message to
+	 * @param world
+	 *            furnace/workbench location for explosion
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param success
+	 *            if recipe was a success or not
+	 */
+	public void explode(Player player, World world, int x, int y, int z, boolean success)
+	{
+		if(explode == null || world == null)
+			return;
 		
-		return data;
+		int[] data = explode.getValue();
+		
+		if(data[0] != 'a' && (success && data[0] == 'f') || (!success && data[0] == 's'))
+			return;
+		
+		if(data[1] < 100 && data[1] < new Random().nextInt(100))
+			return;
+		
+		world.createExplosion(x, y, z, (float)data[2], (data[3] == 0 ? false : true));
+		
+		if(player != null)
+		{
+			Messages msg = Messages.CRAFT_EXPLODE;
+			
+			switch(data[0])
+			{
+				case 's':
+					msg = Messages.CRAFT_EXPLODEONSUCCESS;
+					break;
+				
+				case 'f':
+					msg = Messages.CRAFT_EXPLODEONFAILURE;
+					break;
+			}
+			
+			msg.print(player, explode.getFailMessage(), new String[][]
+			{
+				{
+					"{chance}",
+					data[1] + "%"
+				}
+			});
+		}
+		
+		return;
 	}
 	
 	/**
@@ -737,5 +810,14 @@ public class Recipe
 		{
 			Messages.printMessage(player, replaceVariables(message, player, ingredient, result));
 		}
+	}
+	
+	private String replaceVariables(String data, Player player, ItemData ingredient, Item result)
+	{
+		data = data.replaceAll("\\{player\\}", (player == null ? "(nobody)" : player.getName()));
+		data = data.replaceAll("\\{ingredient\\}", (ingredient == null ? "nothing" : result.printItemData()));
+		data = data.replaceAll("\\{result\\}", (result == null ? "nothing" : result.printItemData()));
+		
+		return data;
 	}
 }

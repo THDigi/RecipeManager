@@ -8,9 +8,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.*;
-import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.inventory.*;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.world.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.Recipe;
@@ -20,17 +20,16 @@ import digi.recipeManager.data.*;
 
 public class Events implements Listener
 {
-	private RecipeManager	plugin;
-	private Recipes			recipes;
-	private Econ			economy;
-	private Settings		settings;
-	private HashSet<String>	furnaceNotified	= new HashSet<String>();
-	private HashSet<String>	furnaceStop		= new HashSet<String>();
+	private RecipeManager			plugin;
+	private Recipes					recipes;
+	private Settings				settings;
+	private HashSet<String>			furnaceNotified	= new HashSet<String>();
+	private HashSet<String>			furnaceStop		= new HashSet<String>();
+	private HashMap<String, int[]>	workbench		= new HashMap<String, int[]>();
 	
 	protected Events()
 	{
 		plugin = RecipeManager.getPlugin();
-		economy = RecipeManager.getEconomy();
 		recipes = RecipeManager.getRecipes();
 		settings = RecipeManager.getSettings();
 	}
@@ -42,6 +41,35 @@ public class Events implements Listener
 		
 		plugin.playerPage.remove(playerName);
 		furnaceNotified.remove(playerName);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void eventPlayerInteract(PlayerInteractEvent event)
+	{
+		String playerName = event.getPlayer().getName();
+		Action action = event.getAction();
+		
+		if(action == Action.RIGHT_CLICK_BLOCK)
+		{
+			Block block = event.getClickedBlock();
+			
+			if(block.getType() == Material.WORKBENCH)
+			{
+				Location loc = block.getLocation();
+				
+				workbench.put(playerName, new int[]
+				{
+					loc.getBlockX(),
+					loc.getBlockY(),
+					loc.getBlockZ(),
+				});
+				
+				return;
+			}
+		}
+		
+		if(action != Action.PHYSICAL)
+			workbench.remove(playerName); // remove when interacting with something else
 	}
 	
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -403,12 +431,26 @@ public class Events implements Listener
 				if(result == null)
 					return;
 				
+				boolean failed = (result.getType() == 0);
+				
+				if(player != null)
+				{
+					int[] vec = workbench.get(player.getName());
+					
+					if(vec != null)
+						recipe.explode(player, player.getWorld(), vec[0], vec[1], vec[2], !failed);
+				}
+				
+				recipe.sendLog((player == null ? null : player.getName()), result);
+				
+				if(failed)
+					return;
+				
 				recipe.affectExp(player);
 				recipe.affectLevel(player);
 				recipe.affectMoney(player);
 				recipe.sendMessages(player, null, result);
 				recipe.sendCommands(player, null, result);
-				recipe.sendLog((player == null ? null : player.getName()), result);
 			}
 			else if(craftRecipe instanceof ShapelessRecipe)
 			{
@@ -417,7 +459,7 @@ public class Events implements Listener
 				if(recipe == null)
 					return;
 				
-				if(player != null && event.isShiftClick() && (recipe.getGiveExp() != null || recipe.getGiveLevel() != null || (economy.isEnabled() && recipe.getGiveMoney() != null)))
+				if(player != null && event.isShiftClick() && recipe.isRewarding())
 				{
 					Messages.NOSHIFTCLICK_REWARDS.print(player);
 					event.setCancelled(true);
@@ -429,12 +471,26 @@ public class Events implements Listener
 				if(result == null)
 					return;
 				
+				boolean failed = (result.getType() == 0);
+				
+				if(player != null)
+				{
+					int[] vec = workbench.get(player.getName());
+					
+					if(vec != null)
+						recipe.explode(player, player.getWorld(), vec[0], vec[1], vec[2], !failed);
+				}
+				
+				recipe.sendLog((player == null ? null : player.getName()), result);
+				
+				if(failed)
+					return;
+				
 				recipe.affectExp(player);
 				recipe.affectLevel(player);
 				recipe.affectMoney(player);
 				recipe.sendMessages(player, null, result);
 				recipe.sendCommands(player, null, result);
-				recipe.sendLog((player == null ? null : player.getName()), result);
 			}
 			else
 				return;
@@ -565,7 +621,6 @@ public class Events implements Listener
 				}
 				
 				result = callEvent.getResult();
-				
 				event.setCurrentItem(result.getItemStack());
 			}
 		}
@@ -642,8 +697,9 @@ public class Events implements Listener
 			}
 			
 			result = callEvent.getResult();
+			boolean failed = (result == null);
 			
-			if(result == null || result.getType() == 0) // special handle for AIR results
+			if(failed || result.getType() == 0) // special handle for AIR results
 			{
 				event.setCancelled(true); // setting the result to null will make the client timeout and the server spit errors
 				
@@ -658,15 +714,7 @@ public class Events implements Listener
 			
 			ItemData ingredient = new ItemData(event.getSource());
 			
-			if(result != null) // recipe did not fail
-			{
-				recipe.affectExp(player);
-				recipe.affectLevel(player);
-				recipe.affectMoney(player);
-				recipe.sendCommands(player, ingredient, result);
-				recipe.sendMessages(player, ingredient, result);
-			}
-			else
+			if(failed)
 			{
 				Messages.CRAFT_FAILURE.print(player, recipe.getFailMessage(), new String[][]
 				{
@@ -676,7 +724,16 @@ public class Events implements Listener
 					}
 				});
 			}
+			else
+			{
+				recipe.affectExp(player);
+				recipe.affectLevel(player);
+				recipe.affectMoney(player);
+				recipe.sendCommands(player, ingredient, result);
+				recipe.sendMessages(player, ingredient, result);
+			}
 			
+			recipe.explode(player, location, !failed);
 			recipe.sendLog(smelterName, ingredient, result);
 		}
 		catch(Exception e)
@@ -759,6 +816,7 @@ public class Events implements Listener
 				recipe.affectMoney(player);
 				recipe.sendCommands(player, recipe.getFuel(), null);
 				recipe.sendMessages(player, recipe.getFuel(), null);
+				recipe.explode(player, location, true);
 				recipe.sendLog(fuelerName, recipe.getFuel());
 			}
 			

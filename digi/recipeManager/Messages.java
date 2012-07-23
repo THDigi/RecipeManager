@@ -18,9 +18,14 @@ public enum Messages
 	CRAFT_NOPERMISSION("craft.nopermission", "<dark_red>You don't have the required permission for this recipe!"),
 	CRAFT_NOGROUP("craft.nogroup", "<dark_red>You're not in the required group to use this recipe!"),
 	CRAFT_NOWORLD("craft.noworld", "<dark_red>You can't use this recipe in this world!"),
+	
 	CRAFT_NOPROXIMITY("craft.noproximity", "<dark_red>Furnace at <gold>{location}<dark_red> uses a recipe that requires you to be at most {distance} blocks away!"),
 	CRAFT_WARNDISTANCE("craft.warndistance", "<dark_green>Recipe will only work as long as you're within {distance} blocks from the furnace!"),
 	CRAFT_WARNONLINE("craft.warnonline", "<dark_green>Recipe will only work as long as you're online in the server!"),
+	
+	CRAFT_EXPLODE("craft.explode", "<dark_green>Recipe exploded! <gray>(<white>{chance} chance of explosion<gray>)"),
+	CRAFT_EXPLODEONSUCCESS("craft.explodeonsuccess", "<dark_green>Recipe exploded! <gray>(<white>{chance} chance of explosion when recipe works<gray>)"),
+	CRAFT_EXPLODEONFAILURE("craft.explodeonfailure", "<dark_red>Recipe exploded! <gray>(<white>{chance} chance of explosion when recipe fails<gray>)"),
 	
 	CRAFT_GIVEEXP("craft.giveexp", "<green>Got {amount} experience<dark_green> for crafting recipe."),
 	CRAFT_TAKEEXP("craft.takeexp", "<gold>Lost {amount} experience<dark_red> for crafting recipe."),

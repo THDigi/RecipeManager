@@ -1,4 +1,4 @@
-  RecipeManager information file ( lastchanged: v1.22c | I'll mark changes in the file with (NEW), (UPDATED) or (REMOVED) )
+  RecipeManager information file ( lastchanged: v1.24 | I'll mark changes in the file with (NEW), (UPDATED) or (REMOVED) )
 
 Plugin's BukkitDev page: http://dev.bukkit.org/server-mods/recipemanager/
 
@@ -164,7 +164,6 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
 
   The flags list:
 
-(NEW)
 @failmessage: message
   Specifies a custom fail by chance message ("Recipe failed! ({chance} chance)")
   You can use "false" to disable it.
@@ -175,7 +174,6 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   The "true" value sets it by default to all players, "false" does the opposite, "op" only sets it to operators and "non-op" sets it only to players that are not operators.
   NOTE: The default value overwrites the previous default value (including permissions made by other plugins)
 
-(NEW)
 @groups: groups, separated, by, comma | <fail message>
   Specifies what groups are required for the recipe to be craftable.
   NOTE: Requires a permission interface plugin (Vault) to work.
@@ -183,7 +181,6 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
 @worlds: world, names, separated, by, comma | <fail message>
   Specifies what worlds the recipe is allowed to be crafted in, worlds that are NOT in this list will be considered restricted.
 
-(NEW)
 @proximity: value | <fail message> | <warn message>
   Sets the required proximity of the smelting/fueling player to the furnace, does nothing for workbench recipes.
   Values:
@@ -194,6 +191,21 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   NOTE: Smelters and fuelers are saved in furnacedata.dat between server restarts.
   NOTE: The <warn message> is displayed whenever someone places the ingredient in the furnace, warning them of proximity or online requirement.
         It's got a default message, no need to specify a custom one if you don't need it tough. Setting it to false will, of course, disable it.
+
+(NEW)
+@explode: when, chance, power, fire | <message>
+  Makes the workbench/furnace explode when recipe is crafted.
+  Arguments:
+    when - (required) can be:
+        fail - when recipe fails due to chance
+        success - when recipe was succesfully crafted/smelted
+        always - regardless of recipe state
+    chance - chance of explosion after "when" is triggered, number 1-100 (required)
+    power - explosion power (4 is TNT-like, required)
+    fire - true or false if the explsoion should set fire (optional, default false)
+  Example: @explode: fail 25 2  =>  when recipe fails there's a 25% chance of a power 4 explosion without fire
+  NOTE: Fuel recipes never trigger on "fail" !
+  NOTE: The <message> is printed whenever explosion occurs and overwrites the default ones from messages.yml
 
 @giveexp: number | <fail message> | <success message>
   How much experience to give or subtract (negative values) from player when crafting

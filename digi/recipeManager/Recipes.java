@@ -1438,7 +1438,7 @@ public class Recipes
 		{
 			if(value.equalsIgnoreCase("false"))
 			{
-				recipe.setWorlds(null);
+				recipe.setProximity(null);
 				return;
 			}
 			
@@ -1462,6 +1462,48 @@ public class Recipes
 			catch(Exception e)
 			{
 				recipeError("@" + flag + " has invalid number value!");
+				return;
+			}
+			
+			return;
+		}
+		
+		if(flag.equalsIgnoreCase("explode"))
+		{
+			if(value.equalsIgnoreCase("false"))
+			{
+				recipe.setExplode(null);
+				return;
+			}
+			
+			split = value.split("\\|");
+			value = split[0].trim();
+			String message = null;
+			
+			if(split.length > 1)
+				message = split[1].trim();
+			
+			split = value.split(" ");
+			
+			if(split.length < 3)
+			{
+				recipeError("@" + flag + " doesn't have enough arguments! Read readme.txt for requirements.");
+				return;
+			}
+			
+			try
+			{
+				recipe.setExplode(new Flag<int[]>(new int[]
+				{
+					Character.valueOf(split[0].trim().charAt(0)),
+					Math.min(Math.max(Integer.valueOf(split[1].trim()), 1), 100),
+					Math.max(Integer.valueOf(split[2].trim()), 1),
+					(split.length > 3 && Boolean.valueOf(split[3].trim()) ? 1 : 0),
+				}, message));
+			}
+			catch(Exception e)
+			{
+				recipeError("@" + flag + " has one or more invalid arguments! Read readme.txt for requirements.");
 				return;
 			}
 			

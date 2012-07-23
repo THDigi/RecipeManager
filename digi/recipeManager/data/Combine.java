@@ -53,18 +53,14 @@ public class Combine extends Recipe
 		
 		int rand = new Random().nextInt(100);
 		int chance = 0;
-		Item result = null;
 		
 		for(Item item : results)
 		{
 			if((chance += item.getChance()) > rand)
-			{
-				result = item;
-				break;
-			}
+				return item;
 		}
 		
-		return result;
+		return new Item(0);
 	}
 	
 	/**

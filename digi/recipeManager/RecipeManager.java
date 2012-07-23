@@ -25,9 +25,9 @@ public class RecipeManager extends JavaPlugin
 {
 	// TODO note to self: remember to always change these when updating the respective files
 	private static final String		LAST_CHANGED_SETTINGS	= "1.23c";
-	private static final String		LAST_CHANGED_README		= "1.22c";
+	private static final String		LAST_CHANGED_README		= "1.24";
 	private static final String		LAST_CHANGED_ALIASES	= "1.21";
-	protected static final String	LAST_CHANGED_MESSAGES	= "1.23d";
+	protected static final String	LAST_CHANGED_MESSAGES	= "1.24";
 	
 	protected HashMap<String, Page>	playerPage				= new HashMap<String, Page>();
 	private HashMap<String, String>	itemAliases				= new HashMap<String, String>();

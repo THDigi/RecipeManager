@@ -53,7 +53,7 @@ public class RecipeManagerCraftEvent extends Event implements Cancellable
 	}
 	
 	/**
-	 * @return result item or null if chance of failure occured
+	 * @return result item or AIR if chance of failure occured
 	 */
 	public Item getResult()
 	{
@@ -61,7 +61,8 @@ public class RecipeManagerCraftEvent extends Event implements Cancellable
 	}
 	
 	/**
-	 * Sets the result to the specified item.
+	 * Sets the result to the specified item.<br>
+	 * Set to AIR to mark as failed.
 	 * 
 	 * @param result
 	 *            the Item result
@@ -73,6 +74,7 @@ public class RecipeManagerCraftEvent extends Event implements Cancellable
 	
 	/**
 	 * Sets the result to the specified item.<br>
+	 * Set to AIR to mark as failed.<br>
 	 * Shortcut for: setResult(new Item(result));
 	 * 
 	 * @param result
@@ -80,7 +82,7 @@ public class RecipeManagerCraftEvent extends Event implements Cancellable
 	 */
 	public void setResult(ItemStack result)
 	{
-		setResult(new Item(result));
+		this.result = new Item(result);
 	}
 	
 	/**

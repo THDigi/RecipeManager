@@ -1,5 +1,15 @@
 == Change log ==
 
+=== v1.24 ===
+++Changed files: readme.txt, messages.yml++
+* Added "explode" flag for recipes, you can now make the workbench/furnaces explode, see readme.txt for details.
+* Fixed recipes giving rewards even when failing by chance
+* Fixed setting "proximity: false" clearing the worlds instead
+* Fixed some API javadoc descriptios on setting/getting results from custom events
+* Fixed some other small inconsistencies
+
+\\
+
 === v1.23e ===
 * Fixed "User not online" error on non-player crafting caused by server mods
 * Changed interaction with vault on adding/removing money to not use negative values, instead use the propper add or subtract methods

@@ -55,7 +55,7 @@ public class RecipeManagerSmeltEvent extends Event implements Cancellable
 	}
 	
 	/**
-	 * @return result item or null if chance of failure occured
+	 * @return result item or NULL if chance of failure occured
 	 */
 	public Item getResult()
 	{
@@ -63,18 +63,8 @@ public class RecipeManagerSmeltEvent extends Event implements Cancellable
 	}
 	
 	/**
-	 * Sets the result of the recipe.
-	 * 
-	 * @param result
-	 *            the new result as ItemStack
-	 */
-	public void setResult(ItemStack result)
-	{
-		this.result = new Item(result);
-	}
-	
-	/**
-	 * Sets the result of the recipe.
+	 * Sets the result of the recipe.<br>
+	 * Set to NULL to mark as failed.
 	 * 
 	 * @param result
 	 *            the new result as Item
@@ -82,6 +72,18 @@ public class RecipeManagerSmeltEvent extends Event implements Cancellable
 	public void setResult(Item result)
 	{
 		this.result = result;
+	}
+	
+	/**
+	 * Sets the result of the recipe.<br>
+	 * Set to NULL to mark as failed.
+	 * 
+	 * @param result
+	 *            the new result as ItemStack
+	 */
+	public void setResult(ItemStack result)
+	{
+		this.result = (result == null ? null : new Item(result));
 	}
 	
 	/**
