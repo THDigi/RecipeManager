@@ -19,7 +19,7 @@ What you need to know about these files:
  - Data, amount and enchantments are completely optional in items.
  - ITEM:DATA can be replaced by an alias ! (defined in aliases.yml)
  - Not all items support amount and enchantments, read the recipe's syntax.
- - Enchanted items can't have more than 1 item, if one does, it's amount will be set to 1.
+ - Enchanted items can't have more than 1 item, if one does, its amount will be set to 1.
  - '...' means that the previous statement can be repeated
  - You must leave an empty line between recipes
  - Chances for multiple results are auto-filled up to 100% with air
@@ -170,7 +170,7 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   NOTE: The {chance} word will be replaced with the chance percent (with the % char!)
 
 @permission: permission.node = true/false/op/non-op | <fail message>
-  Specifies what permission is required for the recipe, optionally change it's default value.
+  Specifies what permission is required for the recipe, optionally change its default value.
   The "true" value sets it by default to all players, "false" does the opposite, "op" only sets it to operators and "non-op" sets it only to players that are not operators.
   NOTE: The default value overwrites the previous default value (including permissions made by other plugins)
 
@@ -190,7 +190,7 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   If the value is not false and requirements are not met, the furnace will send the failure message to the player (if online) and stop smelting/fueling.
   NOTE: Smelters and fuelers are saved in furnacedata.dat between server restarts.
   NOTE: The <warn message> is displayed whenever someone places the ingredient in the furnace, warning them of proximity or online requirement.
-        It's got a default message, no need to specify a custom one if you don't need it tough. Setting it to false will, of course, disable it.
+        Its got a default message, no need to specify a custom one if you don't need it tough. Setting it to false will, of course, disable it.
 
 (NEW)
 @explode: when, chance, power, fire | <message>
