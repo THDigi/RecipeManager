@@ -83,7 +83,7 @@ public class Item extends ItemData
 		
 		int dur = item.getDurability();
 		
-		return (item.getTypeId() == type && (dur == -1 || dur == data));
+		return (item.getTypeId() == type && (dur == -1 || data == -1 || dur == data));
 	}
 	
 	public boolean compareItemData(ItemData item)
