@@ -8,7 +8,6 @@ import java.util.regex.*;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.*;
-import org.bukkit.event.world.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import digi.recipeManager.Metrics.Graph;
@@ -262,31 +261,7 @@ public class RecipeManager extends JavaPlugin
 		
 		// Apply changes to events
 		
-		Bukkit.getPluginManager().registerEvents(events, plugin);
-		
-		if(settings.COMPATIBILITY_CHUNKEVENTS)
-		{
-			if(recipes.furnaceSmelting == null)
-			{
-				recipes.furnaceSmelting = new HashMap<String, Double>();
-				
-				for(World world : Bukkit.getServer().getWorlds())
-				{
-					events.worldLoad(world);
-				}
-			}
-		}
-		else
-		{
-			if(recipes.furnaceSmelting != null)
-			{
-				recipes.furnaceSmelting = null;
-				
-				ChunkLoadEvent.getHandlerList().unregister(events);
-				ChunkUnloadEvent.getHandlerList().unregister(events);
-				WorldLoadEvent.getHandlerList().unregister(events);
-			}
-		}
+		events.registerEvents();
 		
 		// Apply item return items
 		

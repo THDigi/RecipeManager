@@ -34,6 +34,36 @@ public class Events implements Listener
 		settings = RecipeManager.getSettings();
 	}
 	
+	protected void registerEvents()
+	{
+		HandlerList.unregisterAll(this);
+		Bukkit.getPluginManager().registerEvents(this, plugin);
+		
+		if(settings.COMPATIBILITY_CHUNKEVENTS)
+		{
+			if(recipes.furnaceSmelting == null)
+			{
+				recipes.furnaceSmelting = new HashMap<String, Double>();
+				
+				for(World world : Bukkit.getServer().getWorlds())
+				{
+					worldLoad(world);
+				}
+			}
+		}
+		else
+		{
+			if(recipes.furnaceSmelting != null)
+			{
+				recipes.furnaceSmelting = null;
+				
+				ChunkLoadEvent.getHandlerList().unregister(this);
+				ChunkUnloadEvent.getHandlerList().unregister(this);
+				WorldLoadEvent.getHandlerList().unregister(this);
+			}
+		}
+	}
+	
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void eventPlayerQuit(PlayerQuitEvent event)
 	{
