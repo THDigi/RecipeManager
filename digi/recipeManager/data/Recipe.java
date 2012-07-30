@@ -1,9 +1,11 @@
 package digi.recipeManager.data;
 
-import java.util.*;
+import java.util.Set;
 
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+
+import com.google.common.base.Joiner;
 
 import digi.recipeManager.*;
 
@@ -12,6 +14,7 @@ public class Recipe
 	private String				failMessage	= null;
 	private Flag<String>		permission	= null;
 	private Flag<Set<String>>	groups		= null;
+	private Flag<Set<String>>	anyGroup	= null;
 	private Flag<Set<String>>	worlds		= null;
 	private Flag<Integer>		proximity	= null;
 	private Flag<int[]>			explode		= null;
@@ -37,6 +40,7 @@ public class Recipe
 		failMessage = recipe.failMessage;
 		permission = recipe.permission;
 		groups = recipe.groups;
+		anyGroup = recipe.anyGroup;
 		worlds = recipe.worlds;
 		proximity = recipe.proximity;
 		explode = recipe.explode;
@@ -94,6 +98,16 @@ public class Recipe
 	public Flag<Set<String>> getGroups()
 	{
 		return groups;
+	}
+	
+	public void setAnyGroup(Flag<Set<String>> anyGroup)
+	{
+		this.anyGroup = anyGroup;
+	}
+	
+	public Flag<Set<String>> getAnyGroup()
+	{
+		return anyGroup;
 	}
 	
 	public void setWorlds(Flag<Set<String>> worlds)
@@ -302,36 +316,53 @@ public class Recipe
 	
 	public boolean isUsableGroups(Player player, boolean printMessages)
 	{
+		Permissions permissions = RecipeManager.getPermissions();
+		
 		if(groups != null)
 		{
 			for(String group : groups.getValue())
 			{
-				if(!RecipeManager.getPermissions().playerInGroup(player, group))
+				if(!permissions.playerInGroup(player, group))
 				{
 					if(printMessages)
 					{
-						StringBuffer groupList = new StringBuffer();
-						
-						for(String str : groups.getValue())
-						{
-							groupList.append(", " + str);
-						}
-						
 						Messages.CRAFT_NOGROUP.print(player, groups.getFailMessage(), new String[][]
 						{
 							{
 								"{groups}",
-								groupList.deleteCharAt(0).deleteCharAt(0).toString()
+								Joiner.on(", ").join(groups.getValue())
 							}
 						});
 					}
 					
-					return false;
+					return false; // player is not in all listed groups
 				}
 			}
 		}
 		
-		return true;
+		if(anyGroup != null)
+		{
+			for(String group : anyGroup.getValue())
+			{
+				if(permissions.playerInGroup(player, group))
+					return true; // player is in at least one listed group
+			}
+			
+			if(printMessages)
+			{
+				Messages.CRAFT_NOGROUP.print(player, anyGroup.getFailMessage(), new String[][]
+				{
+					{
+						"{groups}",
+						Joiner.on(", ").join(anyGroup.getValue())
+					}
+				});
+			}
+			
+			return false; // player is not in any listed group
+		}
+		
+		return true; // no group requirements
 	}
 	
 	public boolean isUsableExp(Player player, boolean printMessages)
@@ -736,10 +767,10 @@ public class Recipe
 		if(data[0] != 'a' && (success && data[0] == 'f') || (!success && data[0] == 's'))
 			return;
 		
-		if(data[1] < 100 && data[1] < new Random().nextInt(100))
+		if(data[1] < 100 && data[1] < RecipeManager.random.nextInt(100))
 			return;
 		
-		world.createExplosion(x, y, z, (float)data[2], (data[3] == 0 ? false : true));
+		world.createExplosion(x, y, z, data[2], (data[3] == 0 ? false : true));
 		
 		if(player != null)
 		{

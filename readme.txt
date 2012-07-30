@@ -165,7 +165,7 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   The flags list:
 
 @failmessage: message
-  Specifies a custom fail by chance message ("Recipe failed! ({chance} chance)")
+  Specifies a custom fail by chance message, default: "Recipe failed! ({chance} chance)"
   You can use "false" to disable it.
   NOTE: The {chance} word will be replaced with the chance percent (with the % char!)
 
@@ -175,8 +175,13 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   NOTE: The default value overwrites the previous default value (including permissions made by other plugins)
 
 @groups: groups, separated, by, comma | <fail message>
-  Specifies what groups are required for the recipe to be craftable.
-  NOTE: Requires a permission interface plugin (Vault) to work.
+  Permission groups that are required to use this recipe, players need to be in all listed groups to use the recipe.
+  NOTE: Requires Vault plugin.
+
+(NEW)
+@anygroup: groups, separated, by, comma | <fail message>
+  Permission groups that can use this recipe, players need to be in at least one group to use the recipe.
+  NOTE: Requires Vault plugin.
 
 @worlds: world, names, separated, by, comma | <fail message>
   Specifies what worlds the recipe is allowed to be crafted in, worlds that are NOT in this list will be considered restricted.
@@ -192,7 +197,6 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   NOTE: The <warn message> is displayed whenever someone places the ingredient in the furnace, warning them of proximity or online requirement.
         Its got a default message, no need to specify a custom one if you don't need it tough. Setting it to false will, of course, disable it.
 
-(NEW)
 @explode: when, chance, power, fire | <message>
   Makes the workbench/furnace explode when recipe is crafted.
   Arguments:

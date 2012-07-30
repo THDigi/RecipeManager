@@ -1,5 +1,14 @@
 == Change log ==
 
+=== v1.24b ===
+* Fixed "rmreload" re-adding events instead of removing and adding, causing repetitive events
+* Fixed "@explode" flag causing the last used workbench to explode when crafting inside player inventory, now the player explodes if there's no workbench
+* Added @anygroup flag to specify groups that can use the recipe, players must be in at least one group to use the recipe (unlike @groups which requires membership of all listed groups)
+* Improved code execution speed a bit with some minor tweaks
+* API Change: Item class' getEnchantments() returns null if there are no enchantments, also added setEnchantments() and addEnchantment() which eases the null handling
+
+\\
+
 === v1.24 ===
 ++Changed files: readme.txt, messages.yml++
 * Added "explode" flag for recipes, you can now make the workbench/furnaces explode, see readme.txt for details.

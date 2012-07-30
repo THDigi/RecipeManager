@@ -1,11 +1,9 @@
 package digi.recipeManager.data;
 
-import java.util.Random;
-
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
-import digi.recipeManager.Messages;
+import digi.recipeManager.*;
 
 public class Smelt extends Recipe
 {
@@ -63,9 +61,7 @@ public class Smelt extends Recipe
 	 */
 	public boolean getChanceResult()
 	{
-		int rand = new Random().nextInt(100);
-		
-		return (result.getChance() > rand);
+		return (result.getChance() > RecipeManager.random.nextInt(100));
 	}
 	
 	/**
@@ -106,7 +102,7 @@ public class Smelt extends Recipe
 	 */
 	public double getTime()
 	{
-		return (maxTime > minTime ? minTime + new Random().nextInt((int)(maxTime - minTime)) : minTime);
+		return (maxTime > minTime ? minTime + RecipeManager.random.nextInt((int)(maxTime - minTime)) : minTime);
 	}
 	
 	public double getMinTime()

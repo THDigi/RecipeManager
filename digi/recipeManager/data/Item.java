@@ -11,7 +11,7 @@ public class Item extends ItemData
 	private static final long			serialVersionUID	= -4358780777605623605L;
 	private int							amount				= 1;
 	private int							chance				= 100;
-	private Map<Enchantment, Integer>	enchantments		= new HashMap<Enchantment, Integer>();
+	private Map<Enchantment, Integer>	enchantments		= null;
 	
 	public Item(int type)
 	{
@@ -41,19 +41,39 @@ public class Item extends ItemData
 	{
 		super(item.getTypeId(), item.getDurability());
 		amount = item.getAmount();
+		enchantments = (item.getEnchantments().isEmpty() ? null : item.getEnchantments());
 	}
 	
 	@Override
 	public ItemStack getItemStack()
 	{
 		ItemStack item = new ItemStack(type, amount, data);
-		item.addUnsafeEnchantments(enchantments);
+		
+		if(enchantments != null)
+			item.addUnsafeEnchantments(enchantments);
+		
 		return item;
 	}
 	
+	/**
+	 * @return enchantments list or NULL if there aren't any
+	 */
 	public Map<Enchantment, Integer> getEnchantments()
 	{
 		return enchantments;
+	}
+	
+	public void setEnchantments(Map<Enchantment, Integer> enchantments)
+	{
+		this.enchantments = enchantments;
+	}
+	
+	public void addEnchantment(Enchantment enchantment, int level)
+	{
+		if(enchantments == null)
+			enchantments = new HashMap<Enchantment, Integer>();
+		
+		enchantments.put(enchantment, level);
 	}
 	
 	public void setAmount(int amount)

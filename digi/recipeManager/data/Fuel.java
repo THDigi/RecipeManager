@@ -1,10 +1,8 @@
 package digi.recipeManager.data;
 
-import java.util.Random;
-
 import org.bukkit.ChatColor;
 
-import digi.recipeManager.Messages;
+import digi.recipeManager.*;
 
 public class Fuel extends Recipe
 {
@@ -90,7 +88,7 @@ public class Fuel extends Recipe
 	 */
 	public int getTime()
 	{
-		return (maxTime > minTime ? minTime + new Random().nextInt(maxTime - minTime) : minTime);
+		return (maxTime > minTime ? minTime + RecipeManager.random.nextInt(maxTime - minTime) : minTime);
 	}
 	
 	@Override

@@ -25,7 +25,7 @@ public class Events implements Listener
 	private Settings				settings;
 	private HashSet<String>			furnaceNotified	= new HashSet<String>();
 	private HashSet<String>			furnaceStop		= new HashSet<String>();
-	private HashMap<String, int[]>	workbench		= new HashMap<String, int[]>();
+	private HashMap<String, int[]>	workbench;
 	
 	protected Events()
 	{
@@ -38,6 +38,11 @@ public class Events implements Listener
 	{
 		HandlerList.unregisterAll(this);
 		Bukkit.getPluginManager().registerEvents(this, plugin);
+		
+		if(!recipes.hasExplosive)
+			PlayerInteractEvent.getHandlerList().unregister(this);
+		else if(workbench == null)
+			workbench = new HashMap<String, int[]>();
 		
 		if(settings.COMPATIBILITY_CHUNKEVENTS)
 		{
@@ -465,10 +470,16 @@ public class Events implements Listener
 				
 				if(player != null)
 				{
-					int[] vec = workbench.get(player.getName());
+					if(event.getInventory().getType() == InventoryType.CRAFTING)
+						recipe.explode(player, player.getLocation(), !failed);
 					
-					if(vec != null)
-						recipe.explode(player, player.getWorld(), vec[0], vec[1], vec[2], !failed);
+					else
+					{
+						int[] vec = workbench.get(player.getName());
+						
+						if(vec != null)
+							recipe.explode(player, player.getWorld(), vec[0], vec[1], vec[2], !failed);
+					}
 				}
 				
 				recipe.sendLog((player == null ? null : player.getName()), result);
@@ -505,10 +516,16 @@ public class Events implements Listener
 				
 				if(player != null)
 				{
-					int[] vec = workbench.get(player.getName());
+					if(event.getInventory().getType() == InventoryType.CRAFTING)
+						recipe.explode(player, player.getLocation(), !failed);
 					
-					if(vec != null)
-						recipe.explode(player, player.getWorld(), vec[0], vec[1], vec[2], !failed);
+					else
+					{
+						int[] vec = workbench.get(player.getName());
+						
+						if(vec != null)
+							recipe.explode(player, player.getWorld(), vec[0], vec[1], vec[2], !failed);
+					}
 				}
 				
 				recipe.sendLog((player == null ? null : player.getName()), result);

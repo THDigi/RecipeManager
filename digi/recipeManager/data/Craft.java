@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 
 import org.bukkit.ChatColor;
 
-import digi.recipeManager.Messages;
+import digi.recipeManager.*;
 
 public class Craft extends Recipe
 {
@@ -52,7 +52,7 @@ public class Craft extends Recipe
 		if(results.size() == 1)
 			return results.get(0);
 		
-		int rand = new Random().nextInt(100);
+		int rand = RecipeManager.random.nextInt(100);
 		int chance = 0;
 		Item result = null;
 		

@@ -30,7 +30,7 @@ public class Recipes
 	private HashMap<String, Smelt>			smeltRecipes		= new HashMap<String, Smelt>();
 	private HashMap<String, Fuel>			fuels				= new HashMap<String, Fuel>();
 	
-	private List<String>					recipeErrors		= new ArrayList<String>();
+	private List<String>					recipeErrors		= null;
 	private String							currentFile			= null;
 	private int								currentFileLine		= 0;
 	
@@ -41,6 +41,8 @@ public class Recipes
 	protected HashMap<String, FurnaceData>	furnaceData			= new HashMap<String, FurnaceData>();
 	protected HashMap<String, Double>		furnaceSmelting		= new HashMap<String, Double>();
 	private int								furnaceTaskId		= 0;
+	
+	protected boolean						hasExplosive		= false;
 	
 	private Logger							log;
 	
@@ -210,16 +212,6 @@ public class Recipes
 	public ItemStack getPlaceholderItem()
 	{
 		return placeholderItem;
-	}
-	
-	/**
-	 * Gets the list of the recipe loading errors
-	 * 
-	 * @return list of strings, never null but can be empty if no errors occured.
-	 */
-	public List<String> getRecipeErrors()
-	{
-		return recipeErrors;
 	}
 	
 	/**
@@ -496,11 +488,13 @@ public class Recipes
 		if(!dir.exists())
 			dir.mkdirs();
 		
-		recipeErrors.clear();
+		recipeErrors = new ArrayList<String>();
 		
 		loadDirectory(dir, simulation);
 		
-		if(recipeErrors.size() > 0)
+		boolean hasErrors = !recipeErrors.isEmpty();
+		
+		if(hasErrors)
 		{
 			StringBuilder errors = new StringBuilder();
 			
@@ -512,6 +506,7 @@ public class Recipes
 			Messages.log(ChatColor.RED + "There were errors processing the files: \r\n\r\n" + ChatColor.YELLOW + errors + "\r\n\r\n");
 		}
 		
+		recipeErrors = null;
 		currentFile = null;
 		currentFileLine = 0;
 		
@@ -551,7 +546,7 @@ public class Recipes
 			}
 		}
 		
-		return (recipeErrors.size() == 0);
+		return !hasErrors;
 	}
 	
 	private void loadDirectory(File dir, boolean simulation)
@@ -840,7 +835,7 @@ public class Recipes
 						}
 					}
 					
-					item.getEnchantments().put(ench, level);
+					item.addEnchantment(ench, level);
 				}
 			}
 			else if(printRecipeErrors)
@@ -1131,7 +1126,7 @@ public class Recipes
 		if(timeSplit.length >= 2)
 			maxTime = Math.max(Integer.valueOf(timeSplit[1]), maxTime);
 		
-		ItemData ingredient = (ItemData)processItem(split[0], -1, true, false, false, true);
+		ItemData ingredient = processItemData(split[0], -1, true, true);
 		
 		if(ingredient == null || ingredient.getType() == 0)
 			return "Invalid item: '" + ingredient + "'";
@@ -1252,7 +1247,7 @@ public class Recipes
 	{
 		while(line != null && line.charAt(0) == '@')
 		{
-			recipeFlags(line.substring(1).trim(), recipeData); // remove the @ and process flags
+			recipeFlags(line, recipeData);
 			line = processLine(readLine(reader), false);
 		}
 		
@@ -1262,7 +1257,7 @@ public class Recipes
 	private void recipeFlags(String line, Recipe recipe)
 	{
 		String[] split = line.split(":", 2);
-		String flag = split[0].trim().toLowerCase();
+		String flag = split[0].substring(1).trim();
 		
 		if(split.length < 2)
 		{
@@ -1397,6 +1392,49 @@ public class Recipes
 				recipe.getGroups().getValue().add(group);
 			}
 			
+			if(recipe.getGroups().getValue().isEmpty())
+				recipe.setGroups(null);
+			
+			return;
+		}
+		
+		if(flag.equalsIgnoreCase("anygroup"))
+		{
+			if(!RecipeManager.getPermissions().isEnabled())
+				return;
+			
+			if(value.equalsIgnoreCase("false"))
+			{
+				recipe.setAnyGroup(null);
+				return;
+			}
+			
+			split = value.split("\\|");
+			value = split[0].trim();
+			String failMessage = null;
+			
+			if(split.length > 1)
+				failMessage = split[1];
+			
+			recipe.setAnyGroup(new Flag<Set<String>>(new HashSet<String>(), failMessage));
+			split = value.split(",");
+			
+			for(String group : split)
+			{
+				group = group.trim();
+				
+				if(group.isEmpty())
+				{
+					recipeError("@" + flag + " has a group that's invalid: '" + group + "'");
+					continue;
+				}
+				
+				recipe.getAnyGroup().getValue().add(group);
+			}
+			
+			if(recipe.getAnyGroup().getValue().isEmpty())
+				recipe.setAnyGroup(null);
+			
 			return;
 		}
 		
@@ -1430,6 +1468,9 @@ public class Recipes
 				
 				recipe.getWorlds().getValue().add(world);
 			}
+			
+			if(recipe.getWorlds().getValue().isEmpty())
+				recipe.setWorlds(null);
 			
 			return;
 		}
@@ -1500,6 +1541,8 @@ public class Recipes
 					Math.max(Integer.valueOf(split[2].trim()), 1),
 					(split.length > 3 && Boolean.valueOf(split[3].trim()) ? 1 : 0),
 				}, message));
+				
+				hasExplosive = true;
 			}
 			catch(Exception e)
 			{

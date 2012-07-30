@@ -1,10 +1,10 @@
 package digi.recipeManager.data;
 
-import java.util.*;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 
-import digi.recipeManager.Messages;
+import digi.recipeManager.*;
 
 public class Combine extends Recipe
 {
@@ -51,7 +51,7 @@ public class Combine extends Recipe
 		if(results.size() == 1)
 			return results.get(0);
 		
-		int rand = new Random().nextInt(100);
+		int rand = RecipeManager.random.nextInt(100);
 		int chance = 0;
 		
 		for(Item item : results)

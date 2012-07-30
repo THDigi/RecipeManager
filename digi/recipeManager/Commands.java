@@ -115,7 +115,7 @@ class CmdRecipes implements CommandExecutor
 				{
 					item = new Item(itemStack);
 					item.setAmount(0);
-					item.getEnchantments().clear();
+					item.setEnchantments(null);
 				}
 			}
 			else
@@ -357,7 +357,7 @@ class CmdReload implements CommandExecutor
 		
 		char lastExistingRecipes = RecipeManager.getSettings().EXISTING_RECIPES;
 		
-		RecipeManager.getPlugin().loadSettings();
+		RecipeManager.plugin.loadSettings();
 		
 		if(lastExistingRecipes != RecipeManager.getSettings().EXISTING_RECIPES && RecipeManager.getSettings().EXISTING_RECIPES == 'n')
 		{
@@ -377,6 +377,8 @@ class CmdReload implements CommandExecutor
 		}
 		else if(sender instanceof Player)
 			Messages.COMMAND_RMRELOAD_ERRORS.print(sender);
+		
+		RecipeManager.events.registerEvents();
 		
 		return true;
 	}

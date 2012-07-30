@@ -8,6 +8,7 @@ import java.util.regex.*;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.*;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import digi.recipeManager.Metrics.Graph;
@@ -31,6 +32,8 @@ public class RecipeManager extends JavaPlugin
 	protected HashMap<String, Page>	playerPage				= new HashMap<String, Page>();
 	private HashMap<String, String>	itemAliases				= new HashMap<String, String>();
 	private String					pluginVersion;
+	
+	public static final Random		random					= new Random();
 	
 	protected static RecipeManager	plugin;
 	protected static Settings		settings;
@@ -79,6 +82,7 @@ public class RecipeManager extends JavaPlugin
 				metrics();
 				loadSettings();
 				recipes.loadRecipes(false);
+				events.registerEvents();
 				
 				Bukkit.getLogger().fine("Done.");
 			}
@@ -94,6 +98,8 @@ public class RecipeManager extends JavaPlugin
 		getServer().getScheduler().cancelTasks(plugin);
 		
 		saveObject(recipes.furnaceData, "furnacedata.dat");
+		
+		HandlerList.unregisterAll(events);
 		
 		recipes.reset();
 		recipes.furnaceData = null;
@@ -258,10 +264,6 @@ public class RecipeManager extends JavaPlugin
 		
 		if(version == null || !version.equals(LAST_CHANGED_SETTINGS))
 			Messages.log("<yellow>config.yml has changed! You should delete it, use rmreload to re-generate it and then re-configure it, and then rmreload again.");
-		
-		// Apply changes to events
-		
-		events.registerEvents();
 		
 		// Apply item return items
 		
