@@ -1,5 +1,19 @@
 == Change log ==
 
+=== v1.24c ===
+* Fixed an error when crafting (NPE regarding CraftItemEvent)
+* Changed power limit for @explode flag from 1 to 0, you can now specify power 0, it will most likely only break the workbench/furnace.
+* Added fine message notifying if group permissions are available or not (like economy did).
+* Added a warning for using "@explode" with "fail" for FUEL recipes as they never fail
+* Added a warning for using "@proximity" with CRAFT or COMBINE recipes as they don't do anything
+* Added a warning for using "@groups" or "@anygroup" without Vault and a group-supporting permission plugin running
+* Added a warning for using "@givemoney", "@minmoney" and "@maxmoney" without Vault and an economy plugin running
+* (API) Added setIngredients() and setResults() for Craft and Combine classes.
+* Improved memory efficiency a bit when loading recipes
+* Updated readme.txt's last changed version (forgot to do it for v1.24b)
+
+\\
+
 === v1.24b ===
 * Fixed "rmreload" re-adding events instead of removing and adding, causing repetitive events
 * Fixed "@explode" flag causing the last used workbench to explode when crafting inside player inventory, now the player explodes if there's no workbench
