@@ -18,6 +18,21 @@ public class Combine extends Recipe
 		this.results = results;
 	}
 	
+	public Combine(Recipe recipeData)
+	{
+		super(recipeData);
+	}
+	
+	/**
+	 * Set the ingredients list.
+	 * 
+	 * @param ingredients
+	 */
+	public void setIngredients(List<Item> ingredients)
+	{
+		this.ingredients = ingredients;
+	}
+	
 	/**
 	 * Get all ingredients for this recipe
 	 * 
@@ -26,6 +41,17 @@ public class Combine extends Recipe
 	public List<Item> getIngredients()
 	{
 		return ingredients;
+	}
+	
+	/**
+	 * Set all possible results for this recipe.<br>
+	 * You can specify only one to be a fixed result.
+	 * 
+	 * @param results
+	 */
+	public void setResults(List<Item> results)
+	{
+		this.results = results;
 	}
 	
 	/**

@@ -19,6 +19,21 @@ public class Craft extends Recipe
 		this.results = results;
 	}
 	
+	public Craft(Recipe recipeData)
+	{
+		super(recipeData);
+	}
+	
+	/**
+	 * Set the ingredients matrix.
+	 * 
+	 * @param ingredients
+	 */
+	public void setIngredients(ItemData[] ingredients)
+	{
+		this.ingredients = ingredients;
+	}
+	
 	/**
 	 * Get all ingredients for this recipe
 	 * 
@@ -27,6 +42,17 @@ public class Craft extends Recipe
 	public ItemData[] getIngredients()
 	{
 		return ingredients;
+	}
+	
+	/**
+	 * Set all possible results for this recipe.<br>
+	 * You can specify only one to be a fixed result.
+	 * 
+	 * @param results
+	 */
+	public void setResults(List<Item> results)
+	{
+		this.results = results;
 	}
 	
 	/**

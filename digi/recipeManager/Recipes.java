@@ -616,13 +616,13 @@ public class Recipes
 				error = null;
 				
 				if(line.equalsIgnoreCase("CRAFT"))
-					error = craftRecipe(line, reader, new Recipe(recipeData), simulation);
+					error = craftRecipe(line, reader, new Craft(recipeData), simulation);
 				else if(line.equalsIgnoreCase("COMBINE"))
-					error = combineRecipe(line, reader, new Recipe(recipeData), simulation);
+					error = combineRecipe(line, reader, new Combine(recipeData), simulation);
 				else if(line.equalsIgnoreCase("SMELT"))
-					error = smeltRecipe(line, reader, new Recipe(recipeData), simulation);
+					error = smeltRecipe(line, reader, new Smelt(recipeData), simulation);
 				else if(line.equalsIgnoreCase("FUEL"))
-					error = fuelRecipe(line, reader, new Recipe(recipeData), simulation);
+					error = fuelRecipe(line, reader, new Fuel(recipeData), simulation);
 				else
 					error = "<yellow>Line " + currentFileLine + " was skipped: \"" + line + "\"";
 				
@@ -845,10 +845,10 @@ public class Recipes
 		return item;
 	}
 	
-	private String craftRecipe(String line, BufferedReader reader, Recipe recipeData, boolean simulation) throws Exception
+	private String craftRecipe(String line, BufferedReader reader, Craft recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
-		line = processRecipeData(line, reader, recipeData); // check for @flags
+		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
 			return "Recipe has no ingredients !";
@@ -953,7 +953,7 @@ public class Recipes
 		
 		// starting the recipe and setting it's result
 		
-		ShapedRecipe recipe = new ShapedRecipe(new ItemStack(placeholderItem.getTypeId(), craftNum, placeholderItem.getDurability()));
+		ShapedRecipe bukkitRecipe = new ShapedRecipe(new ItemStack(placeholderItem.getTypeId(), craftNum, placeholderItem.getDurability()));
 		String[] chars = new String[recipeShape.size()];
 		int i = 0;
 		
@@ -962,11 +962,11 @@ public class Recipes
 			chars[i++] = (shapeRow.length() < largest ? (shapeRow + "    ").substring(0, largest) : shapeRow);
 		}
 		
-		recipe.shape(chars);
+		bukkitRecipe.shape(chars);
 		
 		for(Entry<ItemData, Character> entry : itemChars.entrySet())
 		{
-			recipe.setIngredient(entry.getValue(), entry.getKey().getMaterial(), entry.getKey().getData());
+			bukkitRecipe.setIngredient(entry.getValue(), entry.getKey().getMaterial(), entry.getKey().getData());
 		}
 		
 		if(simulation)
@@ -980,19 +980,22 @@ public class Recipes
 		
 		// finally add the recipe to the server!
 		
-		if(!Bukkit.addRecipe(recipe))
+		if(!Bukkit.addRecipe(bukkitRecipe))
 			return "Couldn't add recipe, unknown error";
 		
-		craftRecipes.add(craftNum, new Craft(ingredients, results, recipeData));
+		recipe.setIngredients(ingredients);
+		recipe.setResults(results);
+		
+		craftRecipes.add(craftNum, recipe);
 		craftNum++;
 		
 		return null;
 	}
 	
-	private String combineRecipe(String line, BufferedReader reader, Recipe recipeData, boolean simulation) throws Exception
+	private String combineRecipe(String line, BufferedReader reader, Combine recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
-		line = processRecipeData(line, reader, recipeData); // check for @flags
+		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
 			return "Recipe has no ingredients !";
@@ -1004,7 +1007,7 @@ public class Recipes
 		if(results == null)
 			return "Invalid result item(s)! (TIP: forgot the '=' ?)";
 		
-		ShapelessRecipe recipe = new ShapelessRecipe(new ItemStack(placeholderItem.getTypeId(), combineNum, placeholderItem.getDurability()));
+		ShapelessRecipe bukkitRecipe = new ShapelessRecipe(new ItemStack(placeholderItem.getTypeId(), combineNum, placeholderItem.getDurability()));
 		List<Item> ingredients = new ArrayList<Item>();
 		Item item;
 		int items = 0;
@@ -1020,7 +1023,7 @@ public class Recipes
 				return "Combine recipes can't have more than 9 ingredients !";
 			
 			ingredients.add(item);
-			recipe.addIngredient(item.getAmount(), item.getMaterial(), item.getData());
+			bukkitRecipe.addIngredient(item.getAmount(), item.getMaterial(), item.getData());
 		}
 		
 		if(simulation)
@@ -1032,19 +1035,22 @@ public class Recipes
 				return "Another recipe with the same ingredients already exists!";
 		}
 		
-		if(!Bukkit.addRecipe(recipe))
+		if(!Bukkit.addRecipe(bukkitRecipe))
 			return "Couldn't add recipe, unknown error";
 		
-		combineRecipes.add(combineNum, new Combine(ingredients, results, recipeData));
+		recipe.setIngredients(ingredients);
+		recipe.setResults(results);
+		
+		combineRecipes.add(combineNum, recipe);
 		combineNum++;
 		
 		return null;
 	}
 	
-	private String smeltRecipe(String line, BufferedReader reader, Recipe recipeData, boolean simulation) throws Exception
+	private String smeltRecipe(String line, BufferedReader reader, Smelt recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
-		line = processRecipeData(line, reader, recipeData); // check for @flags
+		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
 			return "Recipe has no ingredient !";
@@ -1098,18 +1104,23 @@ public class Recipes
 		if(!Bukkit.addRecipe(new FurnaceRecipe((result.getType() == 0 ? new ItemStack(placeholderItem.getTypeId()) : result.getItemStack()), ingredient.getMaterial(), ingredient.getData())))
 			return "Couldn't add recipe, unknown error";
 		
-		smeltRecipes.put(getIngredientString(ingredient), new Smelt(ingredient, result, minTime, maxTime, recipeData));
+		recipe.setIngredient(ingredient);
+		recipe.setResult(result);
+		recipe.setMinTime(minTime);
+		recipe.setMaxTime(maxTime);
 		
-		if(!smeltCustomRecipes && minTime >= 0.0)
+		smeltRecipes.put(getIngredientString(ingredient), recipe);
+		
+		if(minTime >= 0.0)
 			smeltCustomRecipes = true;
 		
 		return null;
 	}
 	
-	private String fuelRecipe(String line, BufferedReader reader, Recipe recipeData, boolean simulation) throws Exception
+	private String fuelRecipe(String line, BufferedReader reader, Fuel recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
-		line = processRecipeData(line, reader, recipeData); // check for @flags
+		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
 			return "Recipe has no ingredient !";
@@ -1143,7 +1154,11 @@ public class Recipes
 		if(fuels.containsKey(ingredient))
 			return "Fuel " + ingredient.getMaterial() + ":" + ingredient.getData() + " already exists!";
 		
-		fuels.put(getIngredientString(ingredient), new Fuel(ingredient, minTime, maxTime, recipeData));
+		recipe.setFuel(ingredient);
+		recipe.setMinTime(minTime);
+		recipe.setMaxTime(maxTime);
+		
+		fuels.put(getIngredientString(ingredient), recipe);
 		
 		return null;
 	}
@@ -1241,6 +1256,7 @@ public class Recipes
 		craftNum = 0;
 		combineNum = 0;
 		smeltCustomRecipes = false;
+		hasExplosive = false;
 	}
 	
 	private String processRecipeData(String line, BufferedReader reader, Recipe recipeData) throws Exception
@@ -1293,7 +1309,7 @@ public class Recipes
 			
 			if(perm.length() < 3 || !perm.matches("[a-zA-Z0-9.]+"))
 			{
-				recipeError("@permission has invalid value: '" + perm + "', minimum 3 chars, numbers, letters and dots only!");
+				recipeError("@" + flag + " has invalid value: '" + perm + "', minimum 3 chars, numbers, letters and dots only!");
 				return;
 			}
 			
@@ -1342,7 +1358,7 @@ public class Recipes
 					
 					default:
 					{
-						recipeError("Invalid default value '" + defValue + "' for permission node '" + perm + "' (TIP: use only true/false/op/non-op)");
+						recipeError("@" + flag + " has invalid default value '" + defValue + "' for permission node '" + perm + "' (TIP: use only true/false/op/non-op)");
 						return;
 					}
 				}
@@ -1361,7 +1377,10 @@ public class Recipes
 		if(flag.equalsIgnoreCase("groups"))
 		{
 			if(!RecipeManager.getPermissions().isEnabled())
+			{
+				recipeError("@" + flag + " can't work without Vault and a permission plugin that supports groups, ignored.");
 				return;
+			}
 			
 			if(value.equalsIgnoreCase("false"))
 			{
@@ -1401,7 +1420,10 @@ public class Recipes
 		if(flag.equalsIgnoreCase("anygroup"))
 		{
 			if(!RecipeManager.getPermissions().isEnabled())
+			{
+				recipeError("@" + flag + " can't work without Vault and a permission plugin that supports groups, ignored.");
 				return;
+			}
 			
 			if(value.equalsIgnoreCase("false"))
 			{
@@ -1477,6 +1499,12 @@ public class Recipes
 		
 		if(flag.equalsIgnoreCase("proximity"))
 		{
+			if(recipe instanceof Craft || recipe instanceof Combine)
+			{
+				recipeError("@" + flag + " doesn't do anything for CRAFT or COMBINE recipes, ignored.");
+				return;
+			}
+			
 			if(value.equalsIgnoreCase("false"))
 			{
 				recipe.setProximity(null);
@@ -1534,11 +1562,19 @@ public class Recipes
 			
 			try
 			{
+				char when = Character.toLowerCase(Character.valueOf(split[0].trim().charAt(0)));
+				
+				if(when == 'f' && recipe instanceof Fuel)
+				{
+					recipeError("@" + flag + " can't be set to 'fail' for FUEL recipes because they never fail, ignored.");
+					return;
+				}
+				
 				recipe.setExplode(new Flag<int[]>(new int[]
 				{
-					Character.valueOf(split[0].trim().charAt(0)),
+					when,
 					Math.min(Math.max(Integer.valueOf(split[1].trim()), 1), 100),
-					Math.max(Integer.valueOf(split[2].trim()), 1),
+					Math.max(Integer.valueOf(split[2].trim()), 0),
 					(split.length > 3 && Boolean.valueOf(split[3].trim()) ? 1 : 0),
 				}, message));
 				
@@ -1600,13 +1636,19 @@ public class Recipes
 		
 		if(flag.equalsIgnoreCase("givexp") || flag.equalsIgnoreCase("giveexp") || flag.equalsIgnoreCase("givelevel") || flag.equalsIgnoreCase("givemoney"))
 		{
+			char type = line.charAt(4);
+			
+			if(type == 'm' && !RecipeManager.getEconomy().isEnabled())
+			{
+				recipeError("@" + flag + " can't work without Vault and an economy plugin, ignored.");
+				return;
+			}
+			
 			split = value.split("\\|");
 			value = split[0].trim();
 			String failMessage = null;
 			String successMessage = null;
-			
 			Double val = null;
-			char type = line.charAt(4);
 			
 			if(!value.equalsIgnoreCase("false"))
 			{
@@ -1649,9 +1691,6 @@ public class Recipes
 				
 				case 'm': // give[m]oney
 				{
-					if(!RecipeManager.getEconomy().isEnabled())
-						return;
-					
 					recipe.setGiveMoney(val == null ? null : new Flag<Double>(val, failMessage, successMessage));
 					break;
 				}
@@ -1662,12 +1701,18 @@ public class Recipes
 		
 		if(flag.equalsIgnoreCase("minxp") || flag.equalsIgnoreCase("minexp") || flag.equalsIgnoreCase("maxxp") || flag.equalsIgnoreCase("maxexp") || flag.equalsIgnoreCase("minlevel") || flag.equalsIgnoreCase("maxlevel") || flag.equalsIgnoreCase("minmoney") || flag.equalsIgnoreCase("maxmoney"))
 		{
+			char type = line.charAt(3);
+			
+			if(type == 'm' && !RecipeManager.getEconomy().isEnabled())
+			{
+				recipeError("@" + flag + " can't work without Vault and an economy plugin, ignored.");
+				return;
+			}
+			
 			split = value.split("\\|");
 			value = split[0].trim();
 			String failMessage = null;
-			
 			Double val = null;
-			char type = line.charAt(3);
 			
 			if(!value.equalsIgnoreCase("false"))
 			{
@@ -1723,9 +1768,6 @@ public class Recipes
 				
 				case 'm': // min/max[m]oney
 				{
-					if(!RecipeManager.getEconomy().isEnabled())
-						return;
-					
 					switch(line.charAt(2))
 					{
 						case 'n':

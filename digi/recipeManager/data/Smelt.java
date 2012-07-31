@@ -21,6 +21,11 @@ public class Smelt extends Recipe
 		this.maxTime = maxTime;
 	}
 	
+	public Smelt(Recipe recipeData)
+	{
+		super(recipeData);
+	}
+	
 	/**
 	 * You can use .getItemStack() to get the ItemStack.
 	 * 

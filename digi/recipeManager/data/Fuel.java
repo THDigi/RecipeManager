@@ -30,6 +30,11 @@ public class Fuel extends Recipe
 		setMaxTime(maxTime);
 	}
 	
+	public Fuel(Recipe recipeData)
+	{
+		super(recipeData);
+	}
+	
 	/**
 	 * Sets the item that will bun as fuel
 	 * 
