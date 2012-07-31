@@ -28,11 +28,11 @@ public class Econ
 				if(vaultEcon != null)
 				{
 					if(vaultEcon.isEnabled())
-						Bukkit.getLogger().fine("Vault detected and connected, economy available.");
+						Bukkit.getLogger().fine("Vault has made economy available for this plugin.");
 					else
 					{
 						vaultEcon = null;
-						Bukkit.getLogger().fine("Vault detected but it's disabled (no economy plugin?), economy not available.");
+						Bukkit.getLogger().fine("Vault doesn't have an economy plugin connected.");
 					}
 				}
 			}
