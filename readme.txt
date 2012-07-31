@@ -1,4 +1,4 @@
-  RecipeManager information file ( lastchanged: v1.24 | I'll mark changes in the file with (NEW), (UPDATED) or (REMOVED) )
+  RecipeManager information file ( lastchanged: v1.24c | I'll mark changes in the file with (NEW), (UPDATED) or (REMOVED) )
 
 Plugin's BukkitDev page: http://dev.bukkit.org/server-mods/recipemanager/
 
@@ -198,7 +198,7 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
         Its got a default message, no need to specify a custom one if you don't need it tough. Setting it to false will, of course, disable it.
 
 @explode: when, chance, power, fire | <message>
-  Makes the workbench/furnace explode when recipe is crafted.
+  Makes the player/workbench/furnace explode when recipe is crafted.
   Arguments:
     when - (required) can be:
         fail - when recipe fails due to chance

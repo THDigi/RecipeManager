@@ -25,7 +25,7 @@ public class RecipeManager extends JavaPlugin
 {
 	// TODO note to self: remember to always change these when updating the respective files
 	private static final String		LAST_CHANGED_SETTINGS	= "1.23c";
-	private static final String		LAST_CHANGED_README		= "1.24";
+	private static final String		LAST_CHANGED_README		= "1.24c";
 	private static final String		LAST_CHANGED_ALIASES	= "1.21";
 	protected static final String	LAST_CHANGED_MESSAGES	= "1.24";
 	
