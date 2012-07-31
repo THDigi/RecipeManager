@@ -468,7 +468,7 @@ public class Events implements Listener
 				
 				boolean failed = (result.getType() == 0);
 				
-				if(player != null)
+				if(recipes.hasExplosive && player != null)
 				{
 					if(event.getInventory().getType() == InventoryType.CRAFTING)
 						recipe.explode(player, player.getLocation(), !failed);
@@ -514,7 +514,7 @@ public class Events implements Listener
 				
 				boolean failed = (result.getType() == 0);
 				
-				if(player != null)
+				if(recipes.hasExplosive && player != null)
 				{
 					if(event.getInventory().getType() == InventoryType.CRAFTING)
 						recipe.explode(player, player.getLocation(), !failed);
