@@ -52,7 +52,6 @@ JUNGLE_LEAVES: LEAVES:3
 # Steps
 STONE_STEP: STEP:0
 SANDSTONE_STEP: STEP:1
-WOOD_STEP: STEP:2
 COBBLESTONE_STEP: STEP:3
 BRICK_STEP: STEP:4
 STONEBRICK_STEP: STEP:5
@@ -177,4 +176,4 @@ BREWINGSTAND: BREWING_STAND_ITEM # The BREWING_STAND is the block itself.
 
 # --------------------------------------------------------------------------------------------------------------
 # DO NOT change this value - it helps plugin to inform you if this file has new options from latest updates!
-lastchanged: 1.21
+lastchanged: 1.25b
