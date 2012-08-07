@@ -20,35 +20,25 @@ import digi.recipeManager.data.*;
 
 public class Events implements Listener
 {
-	private RecipeManager			plugin;
-	private Recipes					recipes;
-	private Settings				settings;
 	private HashSet<String>			furnaceNotified	= new HashSet<String>();
 	private HashSet<String>			furnaceStop		= new HashSet<String>();
 	private HashMap<String, int[]>	workbench;
 	
-	protected Events()
-	{
-		plugin = RecipeManager.getPlugin();
-		recipes = RecipeManager.getRecipes();
-		settings = RecipeManager.getSettings();
-	}
-	
 	protected void registerEvents()
 	{
 		HandlerList.unregisterAll(this);
-		Bukkit.getPluginManager().registerEvents(this, plugin);
+		Bukkit.getPluginManager().registerEvents(this, RecipeManager.plugin);
 		
-		if(!recipes.hasExplosive)
+		if(!RecipeManager.recipes.hasExplosive)
 			PlayerInteractEvent.getHandlerList().unregister(this);
 		else if(workbench == null)
 			workbench = new HashMap<String, int[]>();
 		
-		if(settings.COMPATIBILITY_CHUNKEVENTS)
+		if(RecipeManager.settings.COMPATIBILITY_CHUNKEVENTS)
 		{
-			if(recipes.furnaceSmelting == null)
+			if(RecipeManager.recipes.furnaceSmelting == null)
 			{
-				recipes.furnaceSmelting = new HashMap<String, Double>();
+				RecipeManager.recipes.furnaceSmelting = new HashMap<String, MutableDouble>();
 				
 				for(World world : Bukkit.getServer().getWorlds())
 				{
@@ -58,9 +48,9 @@ public class Events implements Listener
 		}
 		else
 		{
-			if(recipes.furnaceSmelting != null)
+			if(RecipeManager.recipes.furnaceSmelting != null)
 			{
-				recipes.furnaceSmelting = null;
+				RecipeManager.recipes.furnaceSmelting = null;
 				
 				ChunkLoadEvent.getHandlerList().unregister(this);
 				ChunkUnloadEvent.getHandlerList().unregister(this);
@@ -69,12 +59,21 @@ public class Events implements Listener
 		}
 	}
 	
+	protected void clearData()
+	{
+		HandlerList.unregisterAll(this);
+		
+		furnaceNotified = null;
+		furnaceStop = null;
+		workbench = null;
+	}
+	
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void eventPlayerQuit(PlayerQuitEvent event)
 	{
 		String playerName = event.getPlayer().getName();
 		
-		plugin.playerPage.remove(playerName);
+		RecipeManager.plugin.playerPage.remove(playerName);
 		furnaceNotified.remove(playerName);
 	}
 	
@@ -152,11 +151,11 @@ public class Events implements Listener
 					if(clicked == null || clicked.getTypeId() == 0) // clicked empty slot
 						return;
 					
-					int slot = ((settings.FURNACE_SHIFT_CLICK == 'f' ? recipes.getFuelRecipe(clicked) != null : event.isRightClick()) ? 1 : 0);
+					int slot = ((RecipeManager.settings.FURNACE_SHIFT_CLICK == 'f' ? RecipeManager.recipes.getFuelRecipe(clicked) != null : event.isRightClick()) ? 1 : 0);
 					ItemStack item = inv.getItem(slot);
 					boolean itemsAlike = (item != null && item.getTypeId() == clicked.getTypeId() && item.getDurability() == clicked.getDurability());
 					
-					if(settings.FURNACE_SHIFT_CLICK == 'f' && slot == 1 && item != null && !itemsAlike)
+					if(RecipeManager.settings.FURNACE_SHIFT_CLICK == 'f' && slot == 1 && item != null && !itemsAlike)
 					{
 						slot = 0;
 						item = inv.getItem(slot);
@@ -208,14 +207,14 @@ public class Events implements Listener
 	
 	private boolean furnacePlaceIngredient(InventoryClickEvent event, Furnace furnace, Player player, ItemStack item)
 	{
-		if(!plugin.allowedToCraft(player)) // player not allowed to craft
+		if(!RecipeManager.plugin.allowedToCraft(player)) // player not allowed to craft
 		{
 			event.setCancelled(true);
 			event.setResult(Result.DENY);
 			return false;
 		}
 		
-		Smelt recipe = recipes.getSmeltRecipe(item);
+		Smelt recipe = RecipeManager.recipes.getSmeltRecipe(item);
 		
 		if(recipe != null && !recipe.isUsableBy(player, true))
 		{
@@ -245,7 +244,7 @@ public class Events implements Listener
 					Messages.CRAFT_WARNONLINE.print(player, recipe.getProximity().getSuccessMessage());
 			}
 			
-			recipes.getFurnaceData(furnace.getLocation(), true).setSmelter(player.getName()).setSmeltItem(recipe.getIngredient());
+			RecipeManager.recipes.getFurnaceData(furnace.getLocation(), true).setSmelter(player.getName()).setSmeltItem(recipe.getIngredient());
 		}
 		
 		return true; // custom recipe or not, no reason to restrict
@@ -253,14 +252,14 @@ public class Events implements Listener
 	
 	private boolean furnacePlaceFuel(InventoryClickEvent event, Furnace furnace, Player player, ItemStack item)
 	{
-		if(!plugin.allowedToCraft(player)) // player not allowed to craft
+		if(!RecipeManager.plugin.allowedToCraft(player)) // player not allowed to craft
 		{
 			event.setCancelled(true);
 			event.setResult(Result.DENY);
 			return false;
 		}
 		
-		Fuel recipe = recipes.getFuelRecipe(item);
+		Fuel recipe = RecipeManager.recipes.getFuelRecipe(item);
 		
 		if(recipe != null && !recipe.isUsableBy(player, true))
 		{
@@ -290,7 +289,7 @@ public class Events implements Listener
 					Messages.CRAFT_WARNONLINE.print(player, recipe.getProximity().getSuccessMessage());
 			}
 			
-			recipes.getFurnaceData(furnace.getLocation(), true).setFueler(player.getName()).setFuelItem(recipe.getFuel());
+			RecipeManager.recipes.getFurnaceData(furnace.getLocation(), true).setFueler(player.getName()).setFuelItem(recipe.getFuel());
 		}
 		
 		return true; // custom recipe or not, no reason to restrict
@@ -305,7 +304,7 @@ public class Events implements Listener
 			
 			CraftingInventory inventory = event.getInventory();
 			
-			if(player != null && !plugin.allowedToCraft(player))
+			if(player != null && !RecipeManager.plugin.allowedToCraft(player))
 			{
 				inventory.setResult(null);
 				return;
@@ -313,7 +312,7 @@ public class Events implements Listener
 			
 			if(event.isRepair())
 			{
-				if(!settings.REPAIR_RECIPES)
+				if(!RecipeManager.settings.REPAIR_RECIPES)
 				{
 					inventory.setResult(null);
 					
@@ -325,7 +324,7 @@ public class Events implements Listener
 				
 				ItemStack result = event.getRecipe().getResult();
 				
-				if(settings.REPAIR_ENCHANTED)
+				if(RecipeManager.settings.REPAIR_ENCHANTED)
 				{
 					ItemStack[] matrix = inventory.getMatrix();
 					ItemStack[] repaired = new ItemStack[2];
@@ -373,12 +372,12 @@ public class Events implements Listener
 			
 			ItemStack craftedResult = craftedRecipe.getResult();
 			
-			if(!recipes.isCustomRecipe(craftedResult))
+			if(!RecipeManager.recipes.isCustomRecipe(craftedResult))
 				return;
 			
 			if(craftedRecipe instanceof ShapedRecipe)
 			{
-				Craft recipe = recipes.getCraftRecipes().get(craftedResult.getAmount());
+				Craft recipe = RecipeManager.recipes.getCraftRecipes().get(craftedResult.getAmount());
 				
 				if(recipe == null)
 					return;
@@ -388,6 +387,8 @@ public class Events implements Listener
 				if(recipe.isUsableBy(player, true))
 					result = recipe.getResults().get(0).getItemStack(); // Display the first result item
 					
+//					result = recipe.getDisplayResult(inventory.getMatrix()); // TODO test
+				
 				RecipeManagerPreCraftEvent callEvent = new RecipeManagerPreCraftEvent(recipe, result, player);
 				Bukkit.getPluginManager().callEvent(callEvent);
 				
@@ -397,7 +398,7 @@ public class Events implements Listener
 			}
 			else if(craftedRecipe instanceof ShapelessRecipe)
 			{
-				Combine recipe = recipes.getCombineRecipes().get(craftedResult.getAmount());
+				Combine recipe = RecipeManager.recipes.getCombineRecipes().get(craftedResult.getAmount());
 				
 				if(recipe == null)
 					return;
@@ -442,14 +443,14 @@ public class Events implements Listener
 			
 			ItemStack craftResult = craftRecipe.getResult();
 			
-			if(!recipes.isCustomRecipe(craftResult))
+			if(!RecipeManager.recipes.isCustomRecipe(craftResult))
 				return;
 			
 			final Player player = (event.getWhoClicked() == null ? null : (Player)event.getWhoClicked());
 			
 			if(craftRecipe instanceof ShapedRecipe)
 			{
-				Craft recipe = recipes.getCraftRecipes().get(craftResult.getAmount());
+				Craft recipe = RecipeManager.recipes.getCraftRecipes().get(craftResult.getAmount());
 				
 				if(recipe == null)
 					return;
@@ -461,6 +462,7 @@ public class Events implements Listener
 					return;
 				}
 				
+				// TODO test recipe.getResult(event.getInventory().getMatrix())
 				Item result = processResult(event, recipe, (recipe.getResults().size() > 1), recipe.getResult(), player);
 				
 				if(result == null)
@@ -468,7 +470,7 @@ public class Events implements Listener
 				
 				boolean failed = (result.getType() == 0);
 				
-				if(recipes.hasExplosive && player != null)
+				if(RecipeManager.recipes.hasExplosive && player != null)
 				{
 					if(event.getInventory().getType() == InventoryType.CRAFTING)
 						recipe.explode(player, player.getLocation(), !failed);
@@ -495,7 +497,7 @@ public class Events implements Listener
 			}
 			else if(craftRecipe instanceof ShapelessRecipe)
 			{
-				Combine recipe = recipes.getCombineRecipes().get(craftResult.getAmount());
+				Combine recipe = RecipeManager.recipes.getCombineRecipes().get(craftResult.getAmount());
 				
 				if(recipe == null)
 					return;
@@ -514,7 +516,7 @@ public class Events implements Listener
 				
 				boolean failed = (result.getType() == 0);
 				
-				if(recipes.hasExplosive && player != null)
+				if(RecipeManager.recipes.hasExplosive && player != null)
 				{
 					if(event.getInventory().getType() == InventoryType.CRAFTING)
 						recipe.explode(player, player.getLocation(), !failed);
@@ -545,7 +547,7 @@ public class Events implements Listener
 			if(player != null)
 			{
 				// temp bugfix for Bukkit with shift clicking and returned items
-				Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
+				Bukkit.getScheduler().scheduleSyncDelayedTask(RecipeManager.plugin, new Runnable()
 				{
 					@Override
 					public void run()
@@ -574,7 +576,7 @@ public class Events implements Listener
 		
 		if(!multiResult)
 		{
-			if(player != null && !recipes.isResultTakeable(player, result, cursor, event.isShiftClick()))
+			if(player != null && !RecipeManager.recipes.isResultTakeable(player, result, cursor, event.isShiftClick()))
 				return null;
 			
 			RecipeManagerCraftEvent callEvent = new RecipeManagerCraftEvent(recipe, result, player, cursor, event.isShiftClick(), event.isRightClick());
@@ -680,7 +682,7 @@ public class Events implements Listener
 	{
 		try
 		{
-			Smelt recipe = recipes.getSmeltRecipe(event.getSource());
+			Smelt recipe = RecipeManager.recipes.getSmeltRecipe(event.getSource());
 			
 			if(recipe == null)
 				return;
@@ -693,7 +695,7 @@ public class Events implements Listener
 			
 			Furnace furnace = (Furnace)blockState;
 			Location location = block.getLocation();
-			FurnaceData furnaceData = recipes.getFurnaceData(location, true);
+			FurnaceData furnaceData = RecipeManager.recipes.getFurnaceData(location, true);
 			String smelterName = furnaceData.getSmelter();
 			
 			if(!recipe.isUsableProximity(smelterName, location, !furnaceNotified.contains(smelterName)))
@@ -734,7 +736,7 @@ public class Events implements Listener
 			furnaceNotified.remove(smelterName);
 			Item result = (recipe.getChanceResult() ? recipe.getResult() : null);
 			
-			RecipeManagerSmeltEvent callEvent = new RecipeManagerSmeltEvent(recipe, recipes.getFuelRecipe(furnaceData.getFuelItem()), result, block, smelterName, furnaceData.getFueler());
+			RecipeManagerSmeltEvent callEvent = new RecipeManagerSmeltEvent(recipe, RecipeManager.recipes.getFuelRecipe(furnaceData.getFuelItem()), result, block, smelterName, furnaceData.getFueler());
 			Bukkit.getPluginManager().callEvent(callEvent);
 			
 			if(callEvent.isCancelled())
@@ -806,15 +808,15 @@ public class Events implements Listener
 				return;
 			}
 			
-			if(settings.COMPATIBILITY_CHUNKEVENTS && recipes.furnaceSmelting != null && !recipes.furnaceSmelting.containsKey(locStr))
-				recipes.furnaceSmelting.put(locStr, (double)0);
+			if(RecipeManager.settings.COMPATIBILITY_CHUNKEVENTS && RecipeManager.recipes.furnaceSmelting != null && !RecipeManager.recipes.furnaceSmelting.containsKey(locStr))
+				RecipeManager.recipes.furnaceSmelting.put(locStr, new MutableDouble());
 			
 			ItemStack ingredient = event.getFuel();
-			Fuel recipe = recipes.getFuelRecipe(ingredient);
+			Fuel recipe = RecipeManager.recipes.getFuelRecipe(ingredient);
 			
 			if(recipe != null)
 			{
-				String fuelerName = recipes.getFurnaceData(location).getFueler();
+				String fuelerName = RecipeManager.recipes.getFurnaceData(location).getFueler();
 				
 				if(!recipe.isUsableProximity(fuelerName, location, !furnaceNotified.contains(fuelerName)))
 				{
@@ -866,8 +868,13 @@ public class Events implements Listener
 				recipe.explode(player, location, true);
 				recipe.sendLog(fuelerName, recipe.getFuel());
 			}
+			else if(RecipeManager.settings.EXISTING_RECIPES != 'n')
+			{
+				event.setBurnTime(0);
+				event.setBurning(false);
+			}
 			
-			if(settings.FUEL_RETURN_BUCKETS)
+			if(RecipeManager.settings.FUEL_RETURN_BUCKETS)
 			{
 				switch(ingredient.getType())
 				{
@@ -875,7 +882,7 @@ public class Events implements Listener
 					case LAVA_BUCKET:
 					case MILK_BUCKET:
 					{
-						Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
+						Bukkit.getScheduler().scheduleSyncDelayedTask(RecipeManager.plugin, new Runnable()
 						{
 							@Override
 							public void run()
@@ -920,10 +927,10 @@ public class Events implements Listener
 				String locString = Recipes.locationToString(block.getLocation());
 				
 				furnaceStop.remove(locString);
-				recipes.furnaceData.remove(locString);
+				RecipeManager.recipes.furnaceData.remove(locString);
 				
-				if(settings.COMPATIBILITY_CHUNKEVENTS && recipes.furnaceSmelting != null)
-					recipes.furnaceSmelting.remove(locString);
+				if(RecipeManager.settings.COMPATIBILITY_CHUNKEVENTS && RecipeManager.recipes.furnaceSmelting != null)
+					RecipeManager.recipes.furnaceSmelting.remove(locString);
 				
 				break;
 			}
@@ -961,7 +968,7 @@ public class Events implements Listener
 	
 	private void furnaceChunk(Chunk chunk, boolean add)
 	{
-		if(chunk == null || recipes.furnaceSmelting == null)
+		if(chunk == null || RecipeManager.recipes.furnaceSmelting == null)
 			return;
 		
 		BlockState tileEnts[] = chunk.getTileEntities();
@@ -976,10 +983,10 @@ public class Events implements Listener
 				if(add)
 				{
 					if(state.getType() == Material.BURNING_FURNACE)
-						recipes.furnaceSmelting.put(Recipes.locationToString(state.getLocation()), (double)0);
+						RecipeManager.recipes.furnaceSmelting.put(Recipes.locationToString(state.getLocation()), new MutableDouble());
 				}
 				else
-					recipes.furnaceSmelting.remove(Recipes.locationToString(state.getLocation()));
+					RecipeManager.recipes.furnaceSmelting.remove(Recipes.locationToString(state.getLocation()));
 			}
 		}
 	}

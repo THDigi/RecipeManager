@@ -1,4 +1,4 @@
-  RecipeManager information file ( lastchanged: v1.24c | I'll mark changes in the file with (NEW), (UPDATED) or (REMOVED) )
+  RecipeManager information file ( lastchanged: v1.26 | I'll mark changes in the file with (NEW), (UPDATED) or (REMOVED) )
 
 Plugin's BukkitDev page: http://dev.bukkit.org/server-mods/recipemanager/
 
@@ -11,7 +11,7 @@ Also consult aliases.yml for shortened itemdata values
 
 In the 'recipes' folder you can create .txt files (with any names) which can contain recipes.
 The plugin will also read sub-folders (except 'DISABLED' folder), there you can place recipes which you don't want to be read.
-Also, the default recipes are stored in the 'default' folder, you can edit and/or remove them at will. (if you want to restore them, just type 'rm restore default recipes' in console or in game as OP)
+Also, the default recipes are stored in the 'default' folder, you can edit and/or remove them at will.
 
 What you need to know about these files:
  - Everything is case insensitive, yoU CaN wRITe as YOU liKE.
@@ -178,7 +178,6 @@ You can also use variables in certain messages, like {amount}, {money}, see defa
   Permission groups that are required to use this recipe, players need to be in all listed groups to use the recipe.
   NOTE: Requires Vault plugin.
 
-(NEW)
 @anygroup: groups, separated, by, comma | <fail message>
   Permission groups that can use this recipe, players need to be in at least one group to use the recipe.
   NOTE: Requires Vault plugin.

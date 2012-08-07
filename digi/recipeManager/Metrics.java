@@ -30,12 +30,10 @@ package digi.recipeManager;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.*;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 /**
  * <p>
@@ -84,11 +82,6 @@ class Metrics
 	private static final int		PING_INTERVAL			= 10;
 	
 	/**
-	 * The plugin this metrics submits for
-	 */
-	private final Plugin			plugin;
-	
-	/**
 	 * All of the custom graphs to submit to metrics
 	 */
 	private final Set<Graph>		graphs					= Collections.synchronizedSet(new HashSet<Graph>());
@@ -123,13 +116,8 @@ class Metrics
 	 */
 	private volatile int			taskId					= -1;
 	
-	public Metrics(Plugin plugin) throws IOException
+	protected Metrics() throws IOException
 	{
-		if(plugin == null)
-			throw new IllegalArgumentException("Plugin cannot be null");
-		
-		this.plugin = plugin;
-		
 		// load the config
 		configurationFile = new File(CONFIG_FILE);
 		configuration = YamlConfiguration.loadConfiguration(configurationFile);
@@ -149,6 +137,11 @@ class Metrics
 		guid = configuration.getString("guid");
 	}
 	
+	protected void clearData()
+	{
+		stop();
+	}
+	
 	/**
 	 * Construct and create a Graph that can be used to separate specific plotters to their own graphs
 	 * on the metrics website. Plotters can be added to the graph object returned.
@@ -156,7 +149,7 @@ class Metrics
 	 * @param name
 	 * @return Graph object created. Will never return NULL under normal circumstances unless bad parameters are given
 	 */
-	public Graph createGraph(String name)
+	protected Graph createGraph(String name)
 	{
 		if(name == null)
 			throw new IllegalArgumentException("Graph name cannot be null");
@@ -176,7 +169,7 @@ class Metrics
 	 * 
 	 * @param plotter
 	 */
-	public void addCustomData(Plotter plotter)
+	protected void addCustomData(Plotter plotter)
 	{
 		if(plotter == null)
 			throw new IllegalArgumentException("Plotter cannot be null");
@@ -188,11 +181,11 @@ class Metrics
 		graphs.add(defaultGraph);
 	}
 	
-	public void stop()
+	protected void stop()
 	{
 		if(taskId > 0)
 		{
-			plugin.getServer().getScheduler().cancelTask(taskId);
+			Bukkit.getScheduler().cancelTask(taskId);
 			taskId = -1;
 		}
 	}
@@ -204,7 +197,7 @@ class Metrics
 	 * 
 	 * @return True if statistics measuring is running, otherwise false.
 	 */
-	public boolean start()
+	protected boolean start()
 	{
 		synchronized(optOutLock)
 		{
@@ -217,9 +210,8 @@ class Metrics
 				return true;
 			
 			// Begin hitting the server with glorious data
-			taskId = plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, new Runnable()
+			taskId = Bukkit.getScheduler().scheduleAsyncRepeatingTask(RecipeManager.plugin, new Runnable()
 			{
-				
 				private boolean	firstPost	= true;
 				
 				@Override
@@ -233,7 +225,7 @@ class Metrics
 							// Disable Task, if it is running and the server owner decided to opt-out
 							if(isOptOut() && taskId > 0)
 							{
-								plugin.getServer().getScheduler().cancelTask(taskId);
+								Bukkit.getScheduler().cancelTask(taskId);
 								taskId = -1;
 							}
 						}
@@ -249,7 +241,7 @@ class Metrics
 					}
 					catch(IOException e)
 					{
-						Bukkit.getLogger().log(Level.INFO, "[Metrics] " + e.getMessage());
+						Bukkit.getLogger().fine("[Metrics] " + e.getMessage());
 					}
 				}
 			}, 0, PING_INTERVAL * 1200);
@@ -263,7 +255,7 @@ class Metrics
 	 * 
 	 * @return
 	 */
-	public boolean isOptOut()
+	protected boolean isOptOut()
 	{
 		synchronized(optOutLock)
 		{
@@ -272,16 +264,12 @@ class Metrics
 				// Reload the metrics file
 				configuration.load(CONFIG_FILE);
 			}
-			catch(IOException ex)
+			catch(Exception e)
 			{
-				Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
+				Bukkit.getLogger().fine("[Metrics] " + e.getMessage());
 				return true;
 			}
-			catch(InvalidConfigurationException ex)
-			{
-				Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
-				return true;
-			}
+			
 			return configuration.getBoolean("opt-out", false);
 		}
 	}
@@ -291,7 +279,7 @@ class Metrics
 	 * 
 	 * @throws IOException
 	 */
-	public void enable() throws IOException
+	protected void enable() throws IOException
 	{
 		// This has to be synchronized or it can collide with the check in the task.
 		synchronized(optOutLock)
@@ -313,7 +301,7 @@ class Metrics
 	 * 
 	 * @throws IOException
 	 */
-	public void disable() throws IOException
+	protected void disable() throws IOException
 	{
 		// This has to be synchronized or it can collide with the check in the task.
 		synchronized(optOutLock)
@@ -336,7 +324,7 @@ class Metrics
 	private void postPlugin(boolean isPing) throws IOException
 	{
 		// The plugin's description file containg all of the plugin data such as name, version, author, etc
-		PluginDescriptionFile description = plugin.getDescription();
+		PluginDescriptionFile description = RecipeManager.plugin.getDescription();
 		
 		// Construct the post data
 		StringBuilder data = new StringBuilder();
@@ -378,7 +366,7 @@ class Metrics
 		}
 		
 		// Create the url
-		URL url = new URL(BASE_URL + String.format(REPORT_URL, encode(plugin.getDescription().getName())));
+		URL url = new URL(BASE_URL + String.format(REPORT_URL, encode(RecipeManager.plugin.getDescription().getName())));
 		
 		// Connect to the website
 		URLConnection connection;
@@ -475,7 +463,7 @@ class Metrics
 	/**
 	 * Represents a custom graph on the website
 	 */
-	public static class Graph
+	protected static class Graph
 	{
 		
 		/**
@@ -499,7 +487,7 @@ class Metrics
 		 * 
 		 * @return
 		 */
-		public String getName()
+		protected String getName()
 		{
 			return name;
 		}
@@ -509,7 +497,7 @@ class Metrics
 		 * 
 		 * @param plotter
 		 */
-		public void addPlotter(Plotter plotter)
+		protected void addPlotter(Plotter plotter)
 		{
 			plotters.add(plotter);
 		}
@@ -519,7 +507,7 @@ class Metrics
 		 * 
 		 * @param plotter
 		 */
-		public void removePlotter(Plotter plotter)
+		protected void removePlotter(Plotter plotter)
 		{
 			plotters.remove(plotter);
 		}
@@ -529,7 +517,7 @@ class Metrics
 		 * 
 		 * @return
 		 */
-		public Set<Plotter> getPlotters()
+		protected Set<Plotter> getPlotters()
 		{
 			return Collections.unmodifiableSet(plotters);
 		}
@@ -555,7 +543,7 @@ class Metrics
 	/**
 	 * Interface used to collect custom data for a plugin
 	 */
-	public static abstract class Plotter
+	protected static abstract class Plotter
 	{
 		
 		/**
@@ -566,7 +554,7 @@ class Metrics
 		/**
 		 * Construct a plotter with the default plot name
 		 */
-		public Plotter()
+		protected Plotter()
 		{
 			this("Default");
 		}
@@ -576,7 +564,7 @@ class Metrics
 		 * 
 		 * @param name
 		 */
-		public Plotter(String name)
+		protected Plotter(String name)
 		{
 			this.name = name;
 		}
@@ -586,14 +574,14 @@ class Metrics
 		 * 
 		 * @return
 		 */
-		public abstract int getValue();
+		protected abstract int getValue();
 		
 		/**
 		 * Get the column name for the plotted point
 		 * 
 		 * @return the plotted point's column name
 		 */
-		public String getColumnName()
+		protected String getColumnName()
 		{
 			return name;
 		}
@@ -601,7 +589,7 @@ class Metrics
 		/**
 		 * Called after the website graphs have been updated
 		 */
-		public void reset()
+		protected void reset()
 		{
 		}
 		

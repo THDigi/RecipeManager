@@ -48,6 +48,12 @@ public class Econ
 		enabled = (vaultEcon != null || iConomyEcon != null);
 	}
 	
+	protected void clearData()
+	{
+		vaultEcon = null;
+		iConomyEcon = null;
+	}
+	
 	/**
 	 * Checks if you can use economy methods.
 	 * 

@@ -5,10 +5,9 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.*;
 
-import org.bukkit.*;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.*;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import digi.recipeManager.Metrics.Graph;
@@ -25,16 +24,14 @@ public class RecipeManager extends JavaPlugin
 {
 	// TODO note to self: remember to always change these when updating the respective files
 	private static final String		LAST_CHANGED_SETTINGS	= "1.23c";
-	private static final String		LAST_CHANGED_README		= "1.24c";
-	private static final String		LAST_CHANGED_ALIASES	= "1.21";
+	private static final String		LAST_CHANGED_README		= "1.26";
+	private static final String		LAST_CHANGED_ALIASES	= "1.25b";
 	protected static final String	LAST_CHANGED_MESSAGES	= "1.24";
+	public static Random			random;
 	
 	protected HashMap<String, Page>	playerPage				= new HashMap<String, Page>();
 	private HashMap<String, String>	itemAliases				= new HashMap<String, String>();
 	private String					pluginVersion;
-	
-	public static final Random		random					= new Random();
-	
 	protected static RecipeManager	plugin;
 	protected static Settings		settings;
 	protected static Recipes		recipes;
@@ -56,6 +53,7 @@ public class RecipeManager extends JavaPlugin
 		economy = new Econ();
 		permissions = new Permissions();
 		events = new Events();
+		random = new Random();
 		
 		// load .dat files
 		
@@ -69,6 +67,7 @@ public class RecipeManager extends JavaPlugin
 		getCommand("rmrecipes").setExecutor(new CmdRecipes());
 		getCommand("rmcheck").setExecutor(new CmdCheck());
 		getCommand("rmreload").setExecutor(new CmdReload());
+		getCommand("rmextract").setExecutor(new CmdExtract());
 		
 		// Execute task 0.5 seconds after all plugins have loaded
 		
@@ -77,14 +76,14 @@ public class RecipeManager extends JavaPlugin
 			@Override
 			public void run()
 			{
-				Bukkit.getLogger().fine("Loading settings and recipes...");
+				getLogger().fine("Loading settings and recipes...");
 				
 				metrics();
 				loadSettings();
 				recipes.loadRecipes(false);
 				events.registerEvents();
 				
-				Bukkit.getLogger().fine("Done.");
+				getLogger().fine("Done.");
 			}
 		}, 10);
 	}
@@ -97,22 +96,31 @@ public class RecipeManager extends JavaPlugin
 	{
 		getServer().getScheduler().cancelTasks(plugin);
 		
+		getLogger().fine("Saving furnacedata.dat file...");
 		saveObject(recipes.furnaceData, "furnacedata.dat");
 		
-		HandlerList.unregisterAll(events);
-		
-		recipes.reset();
-		recipes.furnaceData = null;
-		recipes.furnaceSmelting = null;
+		random = null;
 		pluginVersion = null;
 		playerPage = null;
 		itemAliases = null;
-		plugin = null;
-		settings = null;
+		
+		recipes.clearData();
 		recipes = null;
+		
+		metrics.clearData();
+		metrics = null;
+		
+		economy.clearData();
 		economy = null;
+		
+		permissions.clearData();
 		permissions = null;
+		
+		events.clearData();
 		events = null;
+		
+		settings = null;
+		plugin = null;
 	}
 	
 	private void saveObject(Object map, String fileName)
@@ -245,7 +253,7 @@ public class RecipeManager extends JavaPlugin
 	protected void loadSettings()
 	{
 		if(!getDataFolder().exists())
-			Bukkit.getLogger().warning("The 'RecipeManager' folder was NOT found, this means you didn't extract it from the .zip archive, which you should have done.");
+			getLogger().warning("The 'RecipeManager' folder was NOT found, this means you didn't extract it from the .zip archive, which you should have done.");
 		
 		// Load: config.yml
 		
@@ -363,7 +371,7 @@ public class RecipeManager extends JavaPlugin
 	{
 		try
 		{
-			metrics = new Metrics(plugin);
+			metrics = new Metrics();
 			
 			// Graph for total recipes
 			

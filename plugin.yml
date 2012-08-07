@@ -1,6 +1,6 @@
 name: RecipeManager
 description: Add, edit or remove recipes and fuels
-version: 1.24c
+version: 1.26
 author: Digi
 website: http://dev.bukkit.org/server-mods/recipemanager/
 dev-url: http://dev.bukkit.org/server-mods/recipemanager/
@@ -20,6 +20,11 @@ commands:
   rmreload:
     aliases: [reloadrecipes]
     description: reload all settings, aliases, language file and recipe files
+    usage: /<command>
+    permission: recipemanager.admin
+  rmextract:
+    aliases: [extractrecipes]
+    description: makes all recipes from other plugins or mods into a text file to allow overriding and editing
     usage: /<command>
     permission: recipemanager.admin
 permissions:

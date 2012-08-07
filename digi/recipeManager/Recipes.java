@@ -24,31 +24,61 @@ import digi.recipeManager.data.Recipe;
 
 public class Recipes
 {
-	private ItemStack						placeholderItem		= new ItemStack(Material.LONG_GRASS, 0, (short)1337);
-	private List<Craft>						craftRecipes		= new ArrayList<Craft>();
-	private List<Combine>					combineRecipes		= new ArrayList<Combine>();
-	private HashMap<String, Smelt>			smeltRecipes		= new HashMap<String, Smelt>();
-	private HashMap<String, Fuel>			fuels				= new HashMap<String, Fuel>();
+	private ItemStack							placeholderItem		= new ItemStack(Material.LONG_GRASS, 0, (short)1337);
+	protected List<Craft>						craftRecipes		= new ArrayList<Craft>();
+	protected List<Combine>						combineRecipes		= new ArrayList<Combine>();
+	protected HashMap<String, Smelt>			smeltRecipes		= new HashMap<String, Smelt>();
+	protected HashMap<String, Fuel>				fuels				= new HashMap<String, Fuel>();
 	
-	private List<String>					recipeErrors		= null;
-	private String							currentFile			= null;
-	private int								currentFileLine		= 0;
+	private HashMap<String, List<String>>		recipeErrors		= null;
+//	private List<String>					recipeErrors		= null;
+	private String								currentFile			= null;
+	private int									currentFileLine		= 0;
 	
-	private int								craftNum			= 0;
-	private int								combineNum			= 0;
-	private boolean							smeltCustomRecipes	= false;
+	private int									craftNum			= 0;
+	private int									combineNum			= 0;
+	private boolean								smeltCustomRecipes	= false;
 	
-	protected HashMap<String, FurnaceData>	furnaceData			= new HashMap<String, FurnaceData>();
-	protected HashMap<String, Double>		furnaceSmelting		= new HashMap<String, Double>();
-	private int								furnaceTaskId		= 0;
+	protected HashMap<String, FurnaceData>		furnaceData			= new HashMap<String, FurnaceData>();
+	protected HashMap<String, MutableDouble>	furnaceSmelting		= new HashMap<String, MutableDouble>();
+	private int									furnaceTaskId		= 0;
 	
-	protected boolean						hasExplosive		= false;
+	protected boolean							hasExplosive		= false;
+	private HashSet<String>						overriddenRecipes	= new HashSet<String>();
 	
-	private Logger							log;
+	private Logger								log;
+	private String								NL					= System.getProperty("line.separator");
 	
 	public Recipes()
 	{
-		log = Bukkit.getLogger();
+		log = RecipeManager.plugin.getLogger();
+	}
+	
+	protected void clearData()
+	{
+		reset();
+		
+		placeholderItem = null;
+		craftRecipes = null;
+		combineRecipes = null;
+		smeltRecipes = null;
+		fuels = null;
+		
+		recipeErrors = null;
+		currentFile = null;
+		currentFileLine = 0;
+		
+		craftNum = 0;
+		combineNum = 0;
+		
+		furnaceData = null;
+		furnaceSmelting = null;
+		furnaceTaskId = 0;
+		
+		overriddenRecipes = null;
+		
+		log = null;
+		NL = null;
 	}
 	
 	/**
@@ -391,7 +421,7 @@ public class Recipes
 	public void removeDefaultRecipes() // removes only vanilla Minecraft recipes
 	{
 		// remove furnace recipes, easy.
-		FurnaceRecipes.getInstance().recipies.keySet().removeAll(new FurnaceRecipes().recipies.keySet());
+		RecipesFurnace.getInstance().recipes.keySet().removeAll(new RecipesFurnace().recipes.keySet());
 		
 		Logger logger = Logger.getLogger("Minecraft");
 		Filter oldFilter = logger.getFilter();
@@ -406,7 +436,7 @@ public class Recipes
 		});
 		
 		// remove workbench recipes, not so easy...
-		List workbenchRaw = new CraftingManager().recipies;
+		List workbenchRaw = new CraftingManager().recipes;
 		List<String> workbench = new ArrayList<String>();
 		
 		logger.setFilter(oldFilter);
@@ -420,7 +450,7 @@ public class Recipes
 				workbench.add(shapelessToString(((ShapelessRecipes)raw).toBukkitRecipe()));
 		}
 		
-		Iterator recipes = CraftingManager.getInstance().getRecipies().iterator();
+		Iterator recipes = CraftingManager.getInstance().getRecipes().iterator();
 		Object obj;
 		
 		while(recipes.hasNext())
@@ -459,8 +489,8 @@ public class Recipes
 			}
 		});
 		
-		FurnaceRecipes.getInstance().recipies.putAll(new FurnaceRecipes().recipies);
-		CraftingManager.getInstance().recipies.addAll(new CraftingManager().recipies);
+		RecipesFurnace.getInstance().recipes.putAll(new RecipesFurnace().recipes);
+		CraftingManager.getInstance().recipes.addAll(new CraftingManager().recipes);
 		
 		logger.setFilter(oldFilter);
 	}
@@ -471,7 +501,7 @@ public class Recipes
 		{
 			reset();
 			
-			switch(RecipeManager.getSettings().EXISTING_RECIPES)
+			switch(RecipeManager.settings.EXISTING_RECIPES)
 			{
 				case 'r':
 					removeDefaultRecipes();
@@ -483,12 +513,12 @@ public class Recipes
 			}
 		}
 		
-		File dir = new File(RecipeManager.getPlugin().getDataFolder() + File.separator + "recipes");
+		File dir = new File(RecipeManager.plugin.getDataFolder() + File.separator + "recipes");
 		
 		if(!dir.exists())
 			dir.mkdirs();
 		
-		recipeErrors = new ArrayList<String>();
+		recipeErrors = new HashMap<String, List<String>>();
 		
 		loadDirectory(dir, simulation);
 		
@@ -498,12 +528,39 @@ public class Recipes
 		{
 			StringBuilder errors = new StringBuilder();
 			
-			for(String error : recipeErrors)
+			for(Entry<String, List<String>> entry : recipeErrors.entrySet())
 			{
-				errors.append(error + "\r\n");
+				errors.append("" + ChatColor.BOLD + ChatColor.BLUE + "File: " + entry.getKey() + NL);
+				
+				for(String error : entry.getValue())
+				{
+					errors.append(ChatColor.WHITE + error + NL);
+				}
+				
+				errors.append(NL);
 			}
 			
-			Messages.log(ChatColor.RED + "There were errors processing the files: \r\n\r\n" + ChatColor.YELLOW + errors + "\r\n\r\n");
+			Messages.log(ChatColor.RED + "There were errors processing the files: " + NL + NL + errors + NL + NL);
+			
+			try
+			{
+				File file = new File(RecipeManager.plugin.getDataFolder() + File.separator + "last recipe errors.log");
+				
+				if(!file.exists())
+					file.createNewFile();
+				
+				BufferedWriter stream = new BufferedWriter(new FileWriter(file, false));
+				
+				stream.write(ChatColor.stripColor(errors.toString()));
+				
+				stream.close();
+				
+				Messages.log(ChatColor.YELLOW + "These errors have been saved in 'server.log' and '" + file.getPath() + "' as well.");
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 		
 		recipeErrors = null;
@@ -520,17 +577,17 @@ public class Recipes
 			
 			// restart furnace task if any custom time smelt recipes exist
 			
-			boolean cancelTask = !RecipeManager.getSettings().COMPATIBILITY_CHUNKEVENTS;
+			boolean cancelTask = !RecipeManager.settings.COMPATIBILITY_CHUNKEVENTS;
 			
 			if(!cancelTask)
 			{
 				if(smeltCustomRecipes)
 				{
 					if(furnaceSmelting == null)
-						furnaceSmelting = new HashMap<String, Double>();
+						furnaceSmelting = new HashMap<String, MutableDouble>();
 					
 					if(furnaceTaskId <= 0)
-						furnaceTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(RecipeManager.getPlugin(), new FurnacesTask(RecipeManager.getSettings().FURNACE_TICKS), 0, RecipeManager.getSettings().FURNACE_TICKS);
+						furnaceTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(RecipeManager.plugin, new FurnacesTask(RecipeManager.settings.FURNACE_TICKS), 0, RecipeManager.settings.FURNACE_TICKS);
 				}
 				else
 				{
@@ -567,7 +624,7 @@ public class Recipes
 					continue;
 				}
 				
-				if(RecipeManager.getSettings().EXISTING_RECIPES == 'n' && fileName.equalsIgnoreCase("default"))
+				if(RecipeManager.settings.EXISTING_RECIPES == 'n' && fileName.equalsIgnoreCase("default"))
 				{
 					log.fine("Skipped the 'default' folder (due to config's 'existing-recipes' set to 'nothing')");
 					continue;
@@ -592,16 +649,16 @@ public class Recipes
 	
 	private void loadDataFile(File file, boolean simulation) throws Exception
 	{
-		String fileName = file.getName(); //.getPath().replace("plugins" + File.separator + "RecipeManager" + File.separator + "recipes" + File.separator, "");
+		String fileName = file.getPath().replace(RecipeManager.plugin.getDataFolder().getPath() + "\\", "");
 		
 		log.fine("Loading '" + fileName + "' file...");
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(file))));
 		Recipe recipeData = new Recipe();
-		String error;
+		String[] error;
 		String line;
 		currentFile = fileName;
-		currentFileLine = 0;
+		currentFileLine = -1; // one line behind to be more human friendly
 		
 		while((line = readLine(reader)) != null)
 		{
@@ -624,10 +681,14 @@ public class Recipes
 				else if(line.equalsIgnoreCase("FUEL"))
 					error = fuelRecipe(line, reader, new Fuel(recipeData), simulation);
 				else
-					error = "<yellow>Line " + currentFileLine + " was skipped: \"" + line + "\"";
+					error = new String[]
+					{
+						"<yellow>This line was skipped: '" + line + "'",
+						"Possible causes: missing recipe type (CRAFT, SMELT, etc); it's part of a recipe and it has empty lines before it"
+					};
 				
 				if(error != null)
-					recipeError(error);
+					recipeError(error[0], (error.length > 1 ? error[1] : null));
 			}
 			catch(Exception e)
 			{
@@ -678,12 +739,26 @@ public class Recipes
 	
 	private void recipeError(String error)
 	{
-		recipeErrors.add("(" + currentFile + ":" + currentFileLine + ") " + error);
+		recipeError(error, null);
+	}
+	
+	private void recipeError(String error, String tip)
+	{
+		List<String> errors = recipeErrors.get(currentFile);
+		
+		if(errors == null)
+			errors = new ArrayList<String>();
+		
+		errors.add("line " + String.format("%-5d", currentFileLine) + ChatColor.WHITE + error + (tip != null ? NL + ChatColor.DARK_GREEN + "          TIP: " + ChatColor.GRAY + tip : ""));
+		
+		recipeErrors.put(currentFile, errors);
 	}
 	
 	protected ItemData processItemData(String string, int defaultData, boolean allowData, boolean printRecipeErrors)
 	{
-		return new ItemData(processItem(string, defaultData, allowData, false, false, printRecipeErrors));
+		Item item = processItem(string, defaultData, allowData, false, false, printRecipeErrors);
+		
+		return (item == null ? null : new ItemData(item));
 	}
 	
 	protected Item processItem(String string, int defaultData, boolean allowData, boolean allowAmount, boolean allowEnchantments, boolean printRecipeErrors)
@@ -700,17 +775,22 @@ public class Recipes
 			return new Item(0);
 		
 		stringArray[0] = stringArray[0].trim();
-		String alias = RecipeManager.getPlugin().getAliases().get(stringArray[0]);
+		String alias = RecipeManager.plugin.getAliases().get(stringArray[0]);
 		
 		if(alias != null)
+		{
+			if(stringArray.length > 2 && printRecipeErrors)
+				recipeError("'" + stringArray[0] + "' is an alias with data and amount.", "You can only set amount e.g.: alias:amount.");
+			
 			return processItem(string.replace(stringArray[0], alias), defaultData, allowData, allowAmount, allowEnchantments, printRecipeErrors);
+		}
 		
 		Material mat = Material.matchMaterial(stringArray[0]);
 		
 		if(mat == null)
 		{
 			if(printRecipeErrors)
-				recipeError("Item '" + stringArray[0] + "' does not exist! (TIP: name could be different, look in readme.txt for links)");
+				recipeError("Item '" + stringArray[0] + "' does not exist!", "Name could be different, look in readme.txt for links");
 			
 			return null;
 		}
@@ -790,7 +870,7 @@ public class Recipes
 					if(enchData.length != 2)
 					{
 						if(printRecipeErrors)
-							recipeError("Enchantments have to be 'ENCHANTMENT:LEVEL' format. (TIP: see readme.txt for enchantment list link)");
+							recipeError("Enchantments have to be 'ENCHANTMENT:LEVEL' format.", "Look in readme.txt for enchantment list link.");
 						
 						continue;
 					}
@@ -811,7 +891,7 @@ public class Recipes
 						if(ench == null)
 						{
 							if(printRecipeErrors)
-								recipeError("Enchantment '" + enchData[0] + "' does not exist! (TIP: name or id could be different, see readme.txt about enchantments list links)");
+								recipeError("Enchantment '" + enchData[0] + "' does not exist!", "Name or ID could be different, look in readme.txt for enchantments list links.");
 							
 							continue;
 						}
@@ -845,13 +925,16 @@ public class Recipes
 		return item;
 	}
 	
-	private String craftRecipe(String line, BufferedReader reader, Craft recipe, boolean simulation) throws Exception
+	private String[] craftRecipe(String line, BufferedReader reader, Craft recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
 		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
-			return "Recipe has no ingredients !";
+			return new String[]
+			{
+				"Recipe has no ingredients !"
+			};
 		
 		HashMap<ItemData, Character> itemChars = new HashMap<ItemData, Character>();
 		List<String> recipeShape = new ArrayList<String>();
@@ -938,6 +1021,13 @@ public class Recipes
 			rows++;
 		}
 		
+		if(rows == 0)
+			return new String[]
+			{
+				"Recipe doesn't have ingredients !",
+				"Consult readme.txt for proper recipe syntax."
+			};
+		
 		// If result wasn't found yet, it's got to be the 4th line
 		
 		if(resultRaw == null)
@@ -946,10 +1036,13 @@ public class Recipes
 		List<Item> results = getResults(resultRaw, reader, false, false);
 		
 		if(results == null)
-			return "Invalid result item(s)! (TIP: forgot the '=' ?)";
+			return null;
 		
 		if(errors)
-			return "Recipe has some invalid ingredients, fix them!";
+			return new String[]
+			{
+				"Recipe has some invalid ingredients, fix them!"
+			};
 		
 		// starting the recipe and setting it's result
 		
@@ -972,16 +1065,72 @@ public class Recipes
 		if(simulation)
 			return null;
 		
+		String ingredientsString = ingredientsToString(ingredients);
+		
 		for(Craft r : craftRecipes)
 		{
-			if(r.getIngredients() == ingredients)
-				return "Another recipe with the same ingredients already exists!";
+			if(ingredientsString.equals(ingredientsToString(r.getIngredients())))
+				return new String[]
+				{
+					"Recipe already defined in one of your recipe files.",
+					(recipe.getOverride() ? "You can't override recipes that are already handled by this plugin because you can simply edit them!" : null)
+				};
+		}
+		
+		Iterator<org.bukkit.inventory.Recipe> recipes = Bukkit.getServer().recipeIterator();
+		org.bukkit.inventory.Recipe rec;
+		ShapedRecipe r;
+		int width = chars[0].length();
+		int height = chars.length;
+		boolean override = recipe.getOverride();
+		boolean exists = false;
+		
+		while(recipes.hasNext())
+		{
+			rec = recipes.next();
+			
+			if(rec == null || !(rec instanceof ShapedRecipe) || isCustomRecipe(rec.getResult()))
+				continue;
+			
+			r = (ShapedRecipe)rec;
+			
+			if(height != r.getShape().length || width != r.getShape()[0].length())
+				continue;
+			
+			if(compareCraftRecipe(ingredients, r))
+			{
+				exists = true;
+				
+				if(override)
+				{
+					recipes.remove();
+					overriddenRecipes.add(ingredientsString);
+				}
+			}
+		}
+		
+		if(override)
+		{
+			if(!exists && !overriddenRecipes.contains(ingredientsString))
+				recipeError("The @override flag couldn't find the original recipe to override, added new recipe instead.", "Maybe shape is diferent, mirrored perhaps ?");
+		}
+		else
+		{
+			if(exists)
+				return new String[]
+				{
+					"Recipe already exists! It's either vanilla or added by another plugin/mod.",
+					"Add @override flag to the recipe to supercede it."
+				};
 		}
 		
 		// finally add the recipe to the server!
 		
 		if(!Bukkit.addRecipe(bukkitRecipe))
-			return "Couldn't add recipe, unknown error";
+			return new String[]
+			{
+				"Couldn't add recipe to server, unknown error!"
+			};
 		
 		recipe.setIngredients(ingredients);
 		recipe.setResults(results);
@@ -992,20 +1141,77 @@ public class Recipes
 		return null;
 	}
 	
-	private String combineRecipe(String line, BufferedReader reader, Combine recipe, boolean simulation) throws Exception
+	private String ingredientsToString(ItemData[] ingredients)
+	{
+		StringBuilder str = new StringBuilder("craft");
+		
+		for(ItemData ingredient : ingredients)
+		{
+			str.append(',').append(ingredient == null ? "" : ingredient.convertString());
+		}
+		
+		return str.toString();
+	}
+	
+	private String ingredientsToString(List<Item> ingredients)
+	{
+		StringBuilder str = new StringBuilder("combine");
+		
+		for(ItemData ingredient : ingredients)
+		{
+			str.append(',').append(ingredient == null ? "" : ingredient.convertString());
+		}
+		
+		return str.toString();
+	}
+	
+	private boolean compareCraftRecipe(ItemData[] ingredients, ShapedRecipe recipe)
+	{
+		ItemStack[] matrix = new ItemStack[9];
+		Map<Character, ItemStack> items = recipe.getIngredientMap();
+		String[] shape = recipe.getShape();
+		int slot = 0;
+		
+		for(int i = 0; i < shape.length; i++)
+		{
+			for(char col : shape[i].toCharArray())
+			{
+				matrix[slot] = items.get(col);
+				slot++;
+			}
+			
+			slot = ((i + 1) * 3);
+		}
+		
+		for(int i = 0; i < 9; i++)
+		{
+			if(matrix[i] == null && ingredients[i] == null)
+				continue;
+			
+			if(matrix[i] == null || ingredients[i] == null || ingredients[i].getType() != matrix[i].getTypeId() || (ingredients[i].getData() != -1 && ingredients[i].getData() != matrix[i].getDurability()))
+				return false;
+		}
+		
+		return true;
+	}
+	
+	private String[] combineRecipe(String line, BufferedReader reader, Combine recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
 		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
-			return "Recipe has no ingredients !";
+			return new String[]
+			{
+				"Recipe has no ingredients !"
+			};
 		
 		String[] ingredientsRaw = line.split("\\+");
 		
 		List<Item> results = getResults(processLine(readLine(reader), true), reader, false, false);
 		
 		if(results == null)
-			return "Invalid result item(s)! (TIP: forgot the '=' ?)";
+			return null;
 		
 		ShapelessRecipe bukkitRecipe = new ShapelessRecipe(new ItemStack(placeholderItem.getTypeId(), combineNum, placeholderItem.getDurability()));
 		List<Item> ingredients = new ArrayList<Item>();
@@ -1017,10 +1223,16 @@ public class Recipes
 			item = processItem(itemRaw, -1, true, true, false, true);
 			
 			if(item == null)
-				return "Combine recipes can't have AIR ingredients !";
+				return new String[]
+				{
+					"Recipe has some invalid ingredients, fix them!"
+				};
 			
 			if((items += item.getAmount()) > 9)
-				return "Combine recipes can't have more than 9 ingredients !";
+				return new String[]
+				{
+					"Combine recipes can't have more than 9 ingredients !"
+				};
 			
 			ingredients.add(item);
 			bukkitRecipe.addIngredient(item.getAmount(), item.getMaterial(), item.getData());
@@ -1031,12 +1243,62 @@ public class Recipes
 		
 		for(Combine r : combineRecipes)
 		{
-			if(r.getIngredients() == ingredients)
-				return "Another recipe with the same ingredients already exists!";
+			if(compareCombineIngredients(r.getIngredients(), bukkitRecipe.getIngredientList()))
+				return new String[]
+				{
+					"Recipe already defined in one of your recipe files.",
+					(recipe.getOverride() ? "You can't override recipes that are already handled by this plugin because you can simply edit them!" : null)
+				};
+		}
+		
+		Iterator<org.bukkit.inventory.Recipe> recipes = Bukkit.getServer().recipeIterator();
+		org.bukkit.inventory.Recipe rec;
+		ShapelessRecipe r;
+		String ingredientsString = ingredientsToString(ingredients);
+		boolean override = recipe.getOverride();
+		boolean exists = false;
+		
+		while(recipes.hasNext())
+		{
+			rec = recipes.next();
+			
+			if(rec == null || !(rec instanceof ShapelessRecipe) || isCustomRecipe(rec.getResult()))
+				continue;
+			
+			r = (ShapelessRecipe)rec;
+			
+			if(compareCombineIngredients(ingredients, r.getIngredientList()))
+			{
+				exists = true;
+				
+				if(override)
+				{
+					recipes.remove();
+					overriddenRecipes.add(ingredientsString);
+				}
+			}
+		}
+		
+		if(override)
+		{
+			if(!exists && !overriddenRecipes.contains(ingredientsString))
+				recipeError("The @override flag couldn't find the original recipe to override, added new recipe instead.");
+		}
+		else
+		{
+			if(exists)
+				return new String[]
+				{
+					"Recipe already exists! It's either vanilla or added by another plugin/mod.",
+					"Add @override flag to the recipe to supercede it."
+				};
 		}
 		
 		if(!Bukkit.addRecipe(bukkitRecipe))
-			return "Couldn't add recipe, unknown error";
+			return new String[]
+			{
+				"Couldn't add recipe to server, unknown error"
+			};
 		
 		recipe.setIngredients(ingredients);
 		recipe.setResults(results);
@@ -1047,23 +1309,63 @@ public class Recipes
 		return null;
 	}
 	
-	private String smeltRecipe(String line, BufferedReader reader, Smelt recipe, boolean simulation) throws Exception
+	private boolean compareCombineIngredients(List<Item> ingredients, List<ItemStack> recipeIngredients)
+	{
+		int size = ingredients.size();
+		
+		if(size != recipeIngredients.size())
+			return false;
+		
+		HashSet<Integer> compared = new HashSet<Integer>();
+		boolean found;
+		
+		for(Item item : ingredients)
+		{
+			found = false;
+			
+			for(int i = 0; i < size; i++)
+			{
+				if(compared.contains(i))
+					continue;
+				
+				if(item.compareItemStack(recipeIngredients.get(i)))
+				{
+					compared.add(i);
+					found = true;
+					break;
+				}
+			}
+			
+			if(!found)
+				return false;
+		}
+		
+		return (compared.size() == size);
+	}
+	
+	private String[] smeltRecipe(String line, BufferedReader reader, Smelt recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
 		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
-			return "Recipe has no ingredient !";
+			return new String[]
+			{
+				"Recipe doesn't have an ingredient !"
+			};
 		
 		String[] split = line.split("%");
 		
 		if(split.length == 0)
-			return "No ingredient!";
+			return new String[]
+			{
+				"Recipe doesn't have an ingredient !"
+			};
 		
 		List<Item> results = getResults(processLine(readLine(reader), true), reader, true, true);
 		
 		if(results == null)
-			return "Invalid result item! (TIP: forgot the '=' ?)";
+			return null;
 		
 		if(results.size() > 1)
 			recipeError("Can't have more than 1 result in this recipe, the rest were ignored.");
@@ -1072,6 +1374,14 @@ public class Recipes
 		
 		// TODO: revert allowData to true when data values for furnaces have been fixed
 		ItemData ingredient = processItemData(split[0], -1, false, true);
+		
+		if(ingredient == null)
+			return new String[]
+			{
+				"Invalid ingredient '" + split[0] + "'.",
+				"Name could be diferent, look in readme.txt for links."
+			};
+		
 		double minTime = -1.0;
 		double maxTime = -1.0;
 		
@@ -1090,7 +1400,11 @@ public class Recipes
 				minTime = 0.0;
 			
 			if(maxTime > -1.0 && minTime >= maxTime)
-				return "Smelting recipe has minimum time less or equal to maximum time! (TIP: Use a single number if you want a fixed value)";
+				return new String[]
+				{
+					"Smelting recipe has minimum time less or equal to maximum time!",
+					"Use a single number if you want a fixed value."
+				};
 		}
 		
 		// the recipe
@@ -1099,17 +1413,67 @@ public class Recipes
 			return null;
 		
 		if(smeltRecipes.containsKey(ingredient.getType() + (ingredient.getData() == -1 ? "" : ":" + ingredient.getData())))
-			return "Recipe for smelting " + ingredient.printItemData() + " already exists! (TIP: if it's a MC recipe, edit it in the 'default' folder)";
+			return new String[]
+			{
+				"Recipe for '" + ingredient.printItemData() + "' is already defined in one of your recipe files.",
+				(recipe.getOverride() ? "You can't override recipes that are already handled by this plugin because you can simply edit them!" : null)
+			};
+		
+		Iterator<org.bukkit.inventory.Recipe> recipes = Bukkit.getServer().recipeIterator();
+		org.bukkit.inventory.Recipe rec;
+		FurnaceRecipe r;
+		String ingredientsString = "smelt," + ingredient.convertString();
+		boolean override = recipe.getOverride();
+		boolean exists = false;
+		
+		while(recipes.hasNext())
+		{
+			rec = recipes.next();
+			
+			if(rec == null || !(rec instanceof FurnaceRecipe) || isCustomRecipe(rec.getResult()))
+				continue;
+			
+			r = (FurnaceRecipe)rec;
+			
+			if(ingredient.compareItemStack(r.getInput()))
+			{
+				exists = true;
+				
+				if(override)
+				{
+					recipes.remove();
+					overriddenRecipes.add(ingredientsString);
+				}
+			}
+		}
+		
+		if(override)
+		{
+			if(!exists && !overriddenRecipes.contains(ingredientsString))
+				recipeError("The @override flag couldn't find the original recipe to override, added new recipe instead.");
+		}
+		else
+		{
+			if(exists)
+				return new String[]
+				{
+					"Recipe for '" + ingredient.printItemData() + "' already exists! It's either vanilla or added by another plugin/mod.",
+					"Add @override flag to the recipe to supercede it."
+				};
+		}
 		
 		if(!Bukkit.addRecipe(new FurnaceRecipe((result.getType() == 0 ? new ItemStack(placeholderItem.getTypeId()) : result.getItemStack()), ingredient.getMaterial(), ingredient.getData())))
-			return "Couldn't add recipe, unknown error";
+			return new String[]
+			{
+				"Couldn't add recipe to server, unknown error"
+			};
 		
 		recipe.setIngredient(ingredient);
 		recipe.setResult(result);
 		recipe.setMinTime(minTime);
 		recipe.setMaxTime(maxTime);
 		
-		smeltRecipes.put(getIngredientString(ingredient), recipe);
+		smeltRecipes.put(ingredient.convertString(), recipe);
 		
 		if(minTime >= 0.0)
 			smeltCustomRecipes = true;
@@ -1117,18 +1481,25 @@ public class Recipes
 		return null;
 	}
 	
-	private String fuelRecipe(String line, BufferedReader reader, Fuel recipe, boolean simulation) throws Exception
+	private String[] fuelRecipe(String line, BufferedReader reader, Fuel recipe, boolean simulation) throws Exception
 	{
 		line = processLine(readLine(reader), false); // skip recipe header, read next line
 		line = processRecipeData(line, reader, recipe); // check for @flags
 		
 		if(line == null)
-			return "Recipe has no ingredient !";
+			return new String[]
+			{
+				"Recipe doesn't have an ingredient !"
+			};
 		
 		String[] split = line.split("%");
 		
 		if(split[1] == null)
-			return "No burn time set!";
+			return new String[]
+			{
+				"Burn time not set !",
+				"It must be set after the ingredient like: ingredient % burntime"
+			};
 		
 		String[] timeSplit = split[1].trim().split("-");
 		int minTime = Math.max(Integer.valueOf(timeSplit[0]), 1);
@@ -1140,25 +1511,41 @@ public class Recipes
 		ItemData ingredient = processItemData(split[0], -1, true, true);
 		
 		if(ingredient == null || ingredient.getType() == 0)
-			return "Invalid item: '" + ingredient + "'";
+			return new String[]
+			{
+				"Invalid item: '" + ingredient + "'"
+			};
 		
 		if(minTime <= 0)
-			return "Fuel " + ingredient.getMaterial() + ":" + ingredient.getData() + " can't burn for negative or zero seconds!";
+			return new String[]
+			{
+				"Fuel " + ingredient + " can't burn for negative or zero seconds!"
+			};
 		
 		if(maxTime > -1 && minTime >= maxTime)
-			return "Fuel " + ingredient.getMaterial() + ":" + ingredient.getData() + " has minimum time less or equal to maximum time! (TIP: Use a single number if you want a fixed value)";
+			return new String[]
+			{
+				"Fuel " + ingredient + " has minimum time less or equal to maximum time!",
+				"Use a single number if you want a fixed value"
+			};
 		
 		if(simulation)
 			return null;
 		
-		if(fuels.containsKey(ingredient))
-			return "Fuel " + ingredient.getMaterial() + ":" + ingredient.getData() + " already exists!";
+		String ingredientString = ingredient.convertString();
+		
+		if(fuels.containsKey(ingredientString))
+			return new String[]
+			{
+				"Fuel " + ingredient.getMaterial() + ":" + ingredient.getData() + " already exists!",
+				"Search the recipe files from this plugin, it can't be from other plugins or mods."
+			};
 		
 		recipe.setFuel(ingredient);
 		recipe.setMinTime(minTime);
 		recipe.setMaxTime(maxTime);
 		
-		fuels.put(getIngredientString(ingredient), recipe);
+		fuels.put(ingredientString, recipe);
 		
 		return null;
 	}
@@ -1197,7 +1584,7 @@ public class Recipes
 				
 				if((totalpercentage += item.getChance()) > 100)
 				{
-					recipeError("Total result items' chance exceeds 100% ! (TIP: not defining percentage for 1 item will make it's chance fit with the rest until 100%)");
+					recipeError("Total result items' chance exceeds 100% !", "Not defining percentage for one item will make its chance fit with the rest until 100%");
 					return null;
 				}
 				
@@ -1206,7 +1593,10 @@ public class Recipes
 			else
 			{
 				if(resultRawSplit[0] == null)
+				{
+					recipeError("Missing result !");
 					return null;
+				}
 				
 				if(noPercentItem != null)
 				{
@@ -1232,21 +1622,25 @@ public class Recipes
 			results.add(noPercentItem);
 		}
 		else if(results.isEmpty())
+		{
+			recipeError("Missing result !");
 			return null;
+		}
 		else if(!oneResult && totalpercentage < 100)
 			results.add(new Item(0, 0, (short)0, (100 - totalpercentage)));
 		
 		return results;
 	}
 	
-	private String getIngredientString(ItemData ingredient)
-	{
-		return ingredient.getType() + (ingredient.getData() == -1 ? "" : ":" + ingredient.getData());
-	}
-	
 	protected void reset()
 	{
 		removeCustomRecipes();
+		
+		if(RecipeManager.settings.EXISTING_RECIPES != 'c')
+		{
+			removeDefaultRecipes();
+			restoreDefaultRecipes();
+		}
 		
 		craftRecipes.clear();
 		combineRecipes.clear();
@@ -1274,6 +1668,52 @@ public class Recipes
 	{
 		String[] split = line.split(":", 2);
 		String flag = split[0].substring(1).trim();
+		
+		if(flag.equalsIgnoreCase("log"))
+		{
+			if(split.length > 1)
+			{
+				try
+				{
+					recipe.setLog(split[1].trim().equalsIgnoreCase("true"));
+				}
+				catch(Exception e)
+				{
+					recipeError("@" + flag + " only accepts true or false! Set to true.");
+					recipe.setLog(true);
+				}
+			}
+			else
+				recipe.setLog(true);
+			
+			return;
+		}
+		
+		if(flag.equalsIgnoreCase("override"))
+		{
+			if(recipe instanceof Fuel)
+			{
+				recipeError("@" + flag + " doesn't do anything for FUEL recipes, ignored.");
+				return;
+			}
+			
+			if(split.length > 1)
+			{
+				try
+				{
+					recipe.setOverride(split[1].trim().equalsIgnoreCase("true"));
+				}
+				catch(Exception e)
+				{
+					recipeError("@" + flag + " only accepts true or false! Set to true.");
+					recipe.setOverride(true);
+				}
+			}
+			else
+				recipe.setOverride(true);
+			
+			return;
+		}
 		
 		if(split.length < 2)
 		{
@@ -1358,7 +1798,7 @@ public class Recipes
 					
 					default:
 					{
-						recipeError("@" + flag + " has invalid default value '" + defValue + "' for permission node '" + perm + "' (TIP: use only true/false/op/non-op)");
+						recipeError("@" + flag + " has invalid default value '" + defValue + "' for permission node '" + perm + "'", "Valid values: true, false, op, non-op");
 						return;
 					}
 				}
@@ -1376,7 +1816,7 @@ public class Recipes
 		
 		if(flag.equalsIgnoreCase("groups"))
 		{
-			if(!RecipeManager.getPermissions().isEnabled())
+			if(!RecipeManager.permissions.isEnabled())
 			{
 				recipeError("@" + flag + " can't work without Vault and a permission plugin that supports groups, ignored.");
 				return;
@@ -1419,7 +1859,7 @@ public class Recipes
 		
 		if(flag.equalsIgnoreCase("anygroup"))
 		{
-			if(!RecipeManager.getPermissions().isEnabled())
+			if(!RecipeManager.permissions.isEnabled())
 			{
 				recipeError("@" + flag + " can't work without Vault and a permission plugin that supports groups, ignored.");
 				return;
@@ -1619,26 +2059,11 @@ public class Recipes
 			return;
 		}
 		
-		if(flag.equalsIgnoreCase("log"))
-		{
-			try
-			{
-				recipe.setLog(Boolean.valueOf(value));
-			}
-			catch(Exception e)
-			{
-				recipeError("@" + flag + " only accepts true or false! Set to true.");
-				recipe.setLog(true);
-			}
-			
-			return;
-		}
-		
 		if(flag.equalsIgnoreCase("givexp") || flag.equalsIgnoreCase("giveexp") || flag.equalsIgnoreCase("givelevel") || flag.equalsIgnoreCase("givemoney"))
 		{
 			char type = line.charAt(4);
 			
-			if(type == 'm' && !RecipeManager.getEconomy().isEnabled())
+			if(type == 'm' && !RecipeManager.economy.isEnabled())
 			{
 				recipeError("@" + flag + " can't work without Vault and an economy plugin, ignored.");
 				return;
@@ -1703,7 +2128,7 @@ public class Recipes
 		{
 			char type = line.charAt(3);
 			
-			if(type == 'm' && !RecipeManager.getEconomy().isEnabled())
+			if(type == 'm' && !RecipeManager.economy.isEnabled())
 			{
 				recipeError("@" + flag + " can't work without Vault and an economy plugin, ignored.");
 				return;

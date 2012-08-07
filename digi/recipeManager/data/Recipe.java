@@ -30,6 +30,7 @@ public class Recipe
 	private Flag<Double>		minMoney	= null;
 	private Flag<Double>		maxMoney	= null;
 	protected boolean			log			= false;
+	protected boolean			override	= false;
 	
 	public Recipe()
 	{
@@ -56,6 +57,7 @@ public class Recipe
 		minMoney = recipe.minMoney;
 		maxMoney = recipe.maxMoney;
 		log = recipe.log;
+		override = recipe.override;
 	}
 	
 	/**
@@ -260,6 +262,16 @@ public class Recipe
 		this.log = log;
 	}
 	
+	public boolean getOverride()
+	{
+		return override;
+	}
+	
+	public void setOverride(boolean override)
+	{
+		this.override = override;
+	}
+	
 	public boolean isUsablePermissions(Player player, boolean printMessages)
 	{
 		if(permission != null && permission.getValue() != null && !player.hasPermission(permission.getValue()))
@@ -371,7 +383,6 @@ public class Recipe
 			return true;
 		
 		int playerExp = new ExperienceManager(player).getCurrentExp();
-//		int playerExp = player.getTotalExperience();
 		
 		boolean usable = true;
 		
@@ -659,20 +670,7 @@ public class Recipe
 		if(giveExp == null || giveExp.getValue() == 0 || player == null)
 			return;
 		
-		new ExperienceManager(player).changeExp(giveExp.getValue());
-		
-		/* inaccurate
-		if(giveExp.getValue() < 0)
-		{
-			int exp = player.getTotalExperience();
-			player.setTotalExperience(0);
-			player.setLevel(0);
-			player.setExp(0);
-			player.giveExp(Math.max(exp + giveExp.getValue(), 0));
-		}
-		else
-			player.giveExp(giveExp.getValue());
-		*/
+		new ExperienceManager(player).addExp(giveExp.getValue());
 		
 		(giveExp.getValue() > 0 ? Messages.CRAFT_GIVEEXP : Messages.CRAFT_TAKEEXP).print(player, giveExp.getSuccessMessage(), new String[][]
 		{

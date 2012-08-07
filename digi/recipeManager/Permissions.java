@@ -32,6 +32,11 @@ public class Permissions
 		}
 	}
 	
+	protected void clearData()
+	{
+		permissions = null;
+	}
+	
 	public boolean isEnabled()
 	{
 		return permissions != null;

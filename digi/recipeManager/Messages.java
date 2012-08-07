@@ -183,7 +183,7 @@ public enum Messages
 	 */
 	public static void printMessage(CommandSender sender, String[] messages)
 	{
-		boolean noColors = (!RecipeManager.getSettings().COLOR_CONSOLE && sender instanceof ConsoleCommandSender);
+		boolean noColors = (!RecipeManager.settings.COLOR_CONSOLE && sender instanceof ConsoleCommandSender);
 		
 		for(String message : messages)
 		{
@@ -202,7 +202,7 @@ public enum Messages
 	 */
 	public static void printMessage(CommandSender sender, String message)
 	{
-		sender.sendMessage(replaceColorCodes((sender instanceof ConsoleCommandSender ? "[RecipeManager] " + message : message), (!RecipeManager.getSettings().COLOR_CONSOLE && sender instanceof ConsoleCommandSender)));
+		sender.sendMessage(replaceColorCodes((sender instanceof ConsoleCommandSender ? "[RecipeManager] " + message : message), (!RecipeManager.settings.COLOR_CONSOLE && sender instanceof ConsoleCommandSender)));
 	}
 	
 	private static String replaceColorCodes(String message, boolean noColors)
@@ -220,11 +220,11 @@ public enum Messages
 	 */
 	public static void loadMessages()
 	{
-		File file = new File(RecipeManager.getPlugin().getDataFolder() + File.separator + "messages.yml");
+		File file = new File(RecipeManager.plugin.getDataFolder() + File.separator + "messages.yml");
 		
 		if(!file.exists())
 		{
-			RecipeManager.getPlugin().saveResource("messages.yml", false);
+			RecipeManager.plugin.saveResource("messages.yml", false);
 			log("messages.yml file created.");
 		}
 		

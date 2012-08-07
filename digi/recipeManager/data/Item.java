@@ -13,6 +13,8 @@ public class Item extends ItemData
 	private int							chance				= 100;
 	private Map<Enchantment, Integer>	enchantments		= null;
 	
+//	public String						special				= null; // TODO test
+	
 	public Item(int type)
 	{
 		super(type);
@@ -96,24 +98,9 @@ public class Item extends ItemData
 		return chance;
 	}
 	
-	public boolean compareItemStack(ItemStack item)
-	{
-		if(item == null)
-			return false;
-		
-		int dur = item.getDurability();
-		
-		return (item.getTypeId() == type && (dur == -1 || data == -1 || dur == data));
-	}
-	
-	public boolean compareItemData(ItemData item)
-	{
-		return (item != null && item.type == type && (item.data == -1 || item.data == data));
-	}
-	
 	public String printAuto()
 	{
-		int enchants = enchantments.size();
+		int enchants = (enchantments == null ? 0 : enchantments.size());
 		
 		return (type == 0 && chance < 100 ? ChatColor.RED + "" + chance + "% failure chance" : (chance < 100 ? ChatColor.YELLOW + "" + chance + "% chance " + ChatColor.WHITE : "") + (amount > 1 ? amount + "x " : "") + getMaterial().toString().toLowerCase() + (data > 0 ? ":" + data : "") + (enchants > 0 ? " (" + enchants + " enchant" + (enchants == 1 ? "" : "s") + ")" : ""));
 	}

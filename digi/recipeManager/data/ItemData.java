@@ -69,13 +69,34 @@ public class ItemData implements Serializable
 		return new ItemStack(type, 1, data);
 	}
 	
-	public String printItemData()
+	public boolean compareItemStack(ItemStack item)
 	{
-		return getMaterial().toString().toLowerCase() + (data > 0 ? ":" + data : "");
+		if(item == null)
+			return false;
+		
+		int dur = item.getDurability();
+		
+		return (item.getTypeId() == type && (dur == -1 || data == -1 || dur == data));
+	}
+	
+	public boolean compareItemData(ItemData item)
+	{
+		return (item != null && item.type == type && (item.data == -1 || item.data == data));
 	}
 	
 	public String convertString()
 	{
-		return type + (data > 0 ? ":" + data : "");
+		return type + (data >= 0 ? ":" + data : "");
+	}
+	
+	public String printItemData()
+	{
+		return getMaterial().toString().toLowerCase() + (data >= 0 ? ":" + data : "");
+	}
+	
+	@Override
+	public String toString()
+	{
+		return printItemData();
 	}
 }

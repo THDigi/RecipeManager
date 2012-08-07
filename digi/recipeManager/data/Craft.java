@@ -94,6 +94,81 @@ public class Craft extends Recipe
 		return result;
 	}
 	
+	// TODO test...
+	/*
+	public ItemStack getDisplayResult(ItemStack[] matrix)
+	{
+		return processResult(results.get(0), matrix).getItemStack();
+	}
+	
+	public Item getResult(ItemStack[] matrix)
+	{
+		return processResult(getResult(), matrix);
+	}
+	
+	private Item processResult(Item result, ItemStack[] matrix)
+	{
+	//		result.setType(-1); // FIXME
+		
+		if(result.getType() == -1)
+		{
+			result.special = "1"; // FIXME
+			
+			int slot = Integer.valueOf(result.special);
+			
+			System.out.print("Clone slot " + slot);
+			
+			if(matrix[slot] != null)
+				return new Item(matrix[slot]);
+			
+			return result;
+		}
+		
+		result.setData((short)-1); // FIXME
+	//		result.special = "r-maxdmg - (1-hp + 2-hp)"; // FIXME
+		result.special = "r-maxdmg - ((1-hp + 2-hp) + r-maxdmg * 10 / 100)";
+		
+		if(result.getData() == -1 && result.special != null)
+		{
+			ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
+			
+			String dataString = new String(result.special);
+			
+			System.out.print("[debug] special data before = " + dataString);
+			
+			dataString = dataString.replace("r-hp", "" + Math.max(result.getMaterial().getMaxDurability() - result.getData(), 0));
+			dataString = dataString.replace("r-data", "" + result.getData());
+			dataString = dataString.replace("r-maxdmg", "" + result.getMaterial().getMaxDurability());
+			
+			for(int i = 0; i < 9; i++)
+			{
+				dataString = dataString.replace((i + 1) + "-hp", "" + (matrix[i] != null ? Math.max(matrix[i].getType().getMaxDurability() - matrix[i].getDurability(), 0) : "0"));
+				dataString = dataString.replace((i + 1) + "-data", "" + (matrix[i] != null ? matrix[i].getDurability() : "0"));
+				dataString = dataString.replace((i + 1) + "-maxdmg", "" + (matrix[i] != null ? matrix[i].getType().getMaxDurability() : "0"));
+			}
+			
+			System.out.print("[debug] special data after = " + dataString);
+			
+			short data = result.getData();
+			
+			try
+			{
+				data = ((Double)scriptEngine.eval(dataString)).shortValue();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			System.out.print("[debug] new data value = " + data);
+			
+			result.setData((short)Math.min(Math.max(data, 0), 65535));
+		}
+		
+		return result;
+	}
+	*/
+	
 	@Override
 	public String[] print()
 	{
