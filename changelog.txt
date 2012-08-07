@@ -1,5 +1,32 @@
 == Change log ==
 
+=== v1.25 ===
+++Changed files: some files from recipes/default/ folder, read below++
+(Built on CB 1.3.1-R0.1, not compatible with 1.2.5)
+* Fixed fine messages not showing in server.log
+* Change default recipe files to reflect the 1.3 changes, details:
+** In "smelt materials.txt"
+*** Added emerald_ore recipe (smelt: emerald_ore = emerald)
+** In "craft misc.txt"
+*** Changed book recipe (combine: leather + 3x paper = book)
+*** Added book_and_quill recipe (combine: book + feather + ink_sack = book_and_quill)
+*** Added emerald_block recipe (craft: 9x emerald = emerald_block)
+*** Added 9x emerald recipe (craft: emerald_block = 9x emerald)
+*** Changed all "Uncompress materials from blocks" from combine to craft for performance
+** In "craft wood.txt"
+*** Changed wood steps recipe (craft: 3x wood = 6x wood steps for each wood type)
+*** Changed wood stairs recipe (craft: [stair shape] 6x wood = 4x wood stairs for each wood type)
+*** Changed sign recipe (craft: 6x wood + stick = 3x sign)
+** In "craft stone.txt"
+*** Added sandstone_stairs recipe (craft: [stair shape] 6x sandstone = 4x sandstone stairs)
+*** Added ender_chest recipe (craft: [chest shape] 8x obsidian + eye of ender = ender chest)
+** In "craft redstone.txt"
+*** Added tripwire_hook recipe (craft: [vertical] iron_ingot + stick + wood = tripwire_hook)
+** In "craft food.txt"
+*** Added enchanted golden_apple recipe (craft: 8x gold_block + red_apple = enchanted golden_apple)
+
+\\
+
 === v1.24c ===
 * Fixed an error when crafting (NPE regarding CraftItemEvent)
 * Changed power limit for @explode flag from 1 to 0, you can now specify power 0, it will most likely only break the workbench/furnace.
