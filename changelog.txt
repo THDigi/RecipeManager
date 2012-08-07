@@ -1,5 +1,14 @@
 == Change log ==
 
+=== v1.25b ===
+++Changed files: aliases.yml, some files from recipes/default/ folder, read below++
+(Built on CB 1.3.1-R0.1 #2281, not compatible with MC 1.2.5)
+* Fixed wood step recipes returning only one because of the WOOD_STEP alias which was removed because WOOD_STEP is now a diferent item
+* Fixed wood stairs not being crafted for each wood type because there's a diferent material for each type instead of data value
+* Added warning when using an alias with data and amount, which isn't possible because it's "alias:amount", no data value.
+
+\\
+
 === v1.25 ===
 ++Changed files: some files from recipes/default/ folder, read below++
 (Built on CB 1.3.1-R0.1, not compatible with 1.2.5)
