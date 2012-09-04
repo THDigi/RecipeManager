@@ -63,7 +63,7 @@ public class ExperienceManager
 			xp = 0;
 		
 		int curLvl = player.getLevel();
-		int newLvl = getLevelForExp(xp);
+		int newLvl = (curLvl < 0 ? 0 : getLevelForExp(xp));
 		
 		if(curLvl != newLvl)
 			player.setLevel(newLvl);
@@ -75,7 +75,7 @@ public class ExperienceManager
 	{
 		int lvl = player.getLevel();
 		
-		return (getXpForLevel(lvl) + Math.round(xpForNextLevel[lvl] * player.getExp()));
+		return (lvl < 0 ? 0 : getXpForLevel(lvl) + Math.round(xpForNextLevel[lvl] * player.getExp()));
 	}
 	
 	private int getLevelForExp(int exp)
