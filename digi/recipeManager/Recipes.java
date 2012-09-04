@@ -2061,7 +2061,7 @@ public class Recipes
 		
 		if(flag.equalsIgnoreCase("givexp") || flag.equalsIgnoreCase("giveexp") || flag.equalsIgnoreCase("givelevel") || flag.equalsIgnoreCase("givemoney"))
 		{
-			char type = line.charAt(4);
+			char type = flag.charAt(4);
 			
 			if(type == 'm' && !RecipeManager.economy.isEnabled())
 			{
@@ -2126,7 +2126,7 @@ public class Recipes
 		
 		if(flag.equalsIgnoreCase("minxp") || flag.equalsIgnoreCase("minexp") || flag.equalsIgnoreCase("maxxp") || flag.equalsIgnoreCase("maxexp") || flag.equalsIgnoreCase("minlevel") || flag.equalsIgnoreCase("maxlevel") || flag.equalsIgnoreCase("minmoney") || flag.equalsIgnoreCase("maxmoney"))
 		{
-			char type = line.charAt(3);
+			char type = flag.charAt(3);
 			
 			if(type == 'm' && !RecipeManager.economy.isEnabled())
 			{
@@ -2163,7 +2163,7 @@ public class Recipes
 				case 'e': // min/max[e]xp
 				case 'x': // min/max[x]p
 				{
-					switch(line.charAt(2))
+					switch(flag.charAt(2))
 					{
 						case 'n':
 							recipe.setMinExp(val == null ? null : new Flag<Integer>(val.intValue(), failMessage));
@@ -2178,7 +2178,7 @@ public class Recipes
 				
 				case 'l': // min/max[l]evel
 				{
-					switch(line.charAt(2))
+					switch(flag.charAt(2))
 					{
 						case 'n':
 							recipe.setMinLevel(val == null ? null : new Flag<Integer>(val.intValue(), failMessage));
@@ -2193,7 +2193,7 @@ public class Recipes
 				
 				case 'm': // min/max[m]oney
 				{
-					switch(line.charAt(2))
+					switch(flag.charAt(2))
 					{
 						case 'n':
 							recipe.setMinMoney(val == null ? null : new Flag<Double>(val, failMessage));
