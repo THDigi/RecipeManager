@@ -26,7 +26,7 @@ public class RecipeManager extends JavaPlugin
 	private static final String		LAST_CHANGED_SETTINGS	= "1.23c";
 	private static final String		LAST_CHANGED_README		= "1.26";
 	private static final String		LAST_CHANGED_ALIASES	= "1.25b";
-	protected static final String	LAST_CHANGED_MESSAGES	= "1.24";
+	protected static final String	LAST_CHANGED_MESSAGES	= "1.26b";
 	public static Random			random;
 	
 	protected HashMap<String, Page>	playerPage				= new HashMap<String, Page>();

@@ -39,11 +39,11 @@ public enum Messages
 	CRAFT_MINLEVEL("craft.minlevel", "<dark_red>Recipe usable if you have <gold>at least {amount} level(s)<dark_red>!"),
 	CRAFT_MAXLEVEL("craft.maxlevel", "<dark_red>Recipe usable if you have <gold>less than {amount} level(s)<dark_red>!"),
 	
-	CRAFT_GIVEMONEY("craft.givemoney", "<green>Got {amount} {money}<dark_green> for crafting recipe."),
-	CRAFT_TAKEMONEY("craft.takemoney", "<gold>Lost {amount} {money}<dark_red> for crafting recipe."),
-	CRAFT_COSTMONEY("craft.costmoney", "<dark_red>Recipe <gold>costs {amount} {money}<dark_red> to craft it!"),
-	CRAFT_MINMONEY("craft.minmoney", "<dark_red>Recipe usable if you have <gold>at least {amount} {money}<dark_red>!"),
-	CRAFT_MAXMONEY("craft.maxmoney", "<dark_red>Recipe usable if you have <gold>less than {amount} {money}<dark_red>!"),
+	CRAFT_GIVEMONEY("craft.givemoney", "<green>Got {money}<dark_green> for crafting recipe."),
+	CRAFT_TAKEMONEY("craft.takemoney", "<gold>Lost {money}<dark_red> for crafting recipe."),
+	CRAFT_COSTMONEY("craft.costmoney", "<dark_red>Recipe <gold>costs {money}<dark_red> to craft it!"),
+	CRAFT_MINMONEY("craft.minmoney", "<dark_red>Recipe usable if you have <gold>at least {money}<dark_red>!"),
+	CRAFT_MAXMONEY("craft.maxmoney", "<dark_red>Recipe usable if you have <gold>less than {money}<dark_red>!"),
 	
 	NOSHIFTCLICK_MULTIPLERESULTS("noshiftclick.multipleresults", "<dark_red>Can't Shift+Click recipes with multiple results <underline>for now<reset><dark_red>, sorry."),
 	NOSHIFTCLICK_REWARDS("noshiftclick.rewards", "<dark_red>Can't Shift+Click recipes that give rewards <underline>for now<reset><dark_red>, sorry."),

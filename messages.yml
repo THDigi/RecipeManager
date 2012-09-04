@@ -42,11 +42,11 @@ craft:
   maxlevel: <dark_red>Recipe usable if you have <gold>less than {amount} level(s)<dark_red>!
 
 # Variable {amount} can also be used to print raw money value since {money} is the formatted value
-  givemoney: <green>Got {amount} {money}<dark_green> for crafting recipe.
-  takemoney: <gold>Lost {amount} {money}<dark_red> for crafting recipe.
-  costmoney: <dark_red>Recipe <gold>costs {amount} {money}<dark_red> to craft it!
-  minmoney: <dark_red>Recipe usable if you have <gold>at least {amount} {money}<dark_red>!
-  maxmoney: <dark_red>Recipe usable if you have <gold>less than {amount} {money}<dark_red>!
+  givemoney: <green>Got {money}<dark_green> for crafting recipe.
+  takemoney: <gold>Lost {money}<dark_red> for crafting recipe.
+  costmoney: <dark_red>Recipe <gold>costs {money}<dark_red> to craft it!
+  minmoney: <dark_red>Recipe usable if you have <gold>at least {money}<dark_red>!
+  maxmoney: <dark_red>Recipe usable if you have <gold>less than {money}<dark_red>!
 
 
 noshiftclick:
@@ -87,4 +87,4 @@ command:
 
 # --------------------------------------------------------------------------------------------------------------
 # DO NOT change this value - it helps plugin to inform you if this file has new options from latest updates!
-lastchanged: 1.24
+lastchanged: 1.26b
