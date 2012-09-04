@@ -2,8 +2,12 @@ package digi.recipeManager;
 
 import java.util.*;
 
+import net.minecraft.server.TileEntity;
+import net.minecraft.server.TileEntityFurnace;
+
 import org.bukkit.*;
 import org.bukkit.block.*;
+import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -971,22 +975,22 @@ public class Events implements Listener
 		if(chunk == null || RecipeManager.recipes.furnaceSmelting == null)
 			return;
 		
-		BlockState tileEnts[] = chunk.getTileEntities();
+		net.minecraft.server.Chunk mcChunk = ((CraftChunk)chunk).getHandle();
+		TileEntity tile;
 		
-		if(tileEnts.length <= 0)
-			return;
-		
-		for(BlockState state : tileEnts)
+		for(Object obj : mcChunk.tileEntities.values())
 		{
-			if(state != null && state instanceof Furnace)
+			if(obj != null && obj instanceof TileEntity)
 			{
-				if(add)
+				tile = (TileEntity)obj;
+				
+				if(tile instanceof TileEntityFurnace)
 				{
-					if(state.getType() == Material.BURNING_FURNACE)
-						RecipeManager.recipes.furnaceSmelting.put(Recipes.locationToString(state.getLocation()), new MutableDouble());
+					if(add)
+						RecipeManager.recipes.furnaceSmelting.put(Recipes.locationToString(new Location(chunk.getWorld(), tile.x, tile.y, tile.z)), new MutableDouble());
+					else
+						RecipeManager.recipes.furnaceSmelting.remove(Recipes.locationToString(new Location(chunk.getWorld(), tile.x, tile.y, tile.z)));
 				}
-				else
-					RecipeManager.recipes.furnaceSmelting.remove(Recipes.locationToString(state.getLocation()));
 			}
 		}
 	}
