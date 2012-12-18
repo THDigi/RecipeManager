@@ -19,10 +19,10 @@ import java.util.logging.Filter;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import net.minecraft.server.v1_4_5.CraftingManager;
-import net.minecraft.server.v1_4_5.RecipesFurnace;
-import net.minecraft.server.v1_4_5.ShapedRecipes;
-import net.minecraft.server.v1_4_5.ShapelessRecipes;
+import net.minecraft.server.v1_4_6.CraftingManager;
+import net.minecraft.server.v1_4_6.RecipesFurnace;
+import net.minecraft.server.v1_4_6.ShapedRecipes;
+import net.minecraft.server.v1_4_6.ShapelessRecipes;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
