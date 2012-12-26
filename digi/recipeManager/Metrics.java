@@ -197,6 +197,7 @@ class Metrics
 	 * 
 	 * @return True if statistics measuring is running, otherwise false.
 	 */
+	@SuppressWarnings("deprecation")
 	protected boolean start()
 	{
 		synchronized(optOutLock)

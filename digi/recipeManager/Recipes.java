@@ -5,21 +5,19 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.*;
 
-import net.minecraft.server.*;
+import net.minecraft.server.v1_4_6.CraftingManager;
+import net.minecraft.server.v1_4_6.RecipesFurnace;
+import net.minecraft.server.v1_4_6.ShapedRecipes;
+import net.minecraft.server.v1_4_6.ShapelessRecipes;
 
 import org.bukkit.*;
-import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.*;
-import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.*;
 
 import digi.recipeManager.data.*;
-import digi.recipeManager.data.Item;
 import digi.recipeManager.data.Recipe;
 
 public class Recipes
