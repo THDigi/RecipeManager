@@ -24,30 +24,30 @@ import digi.recipeManager.data.Recipe;
 
 public class Recipes
 {
-	private ItemStack							placeholderItem		= new ItemStack(Material.LONG_GRASS, 0, (short)1337);
-	protected List<Craft>						craftRecipes		= new ArrayList<Craft>();
-	protected List<Combine>						combineRecipes		= new ArrayList<Combine>();
-	protected HashMap<String, Smelt>			smeltRecipes		= new HashMap<String, Smelt>();
-	protected HashMap<String, Fuel>				fuels				= new HashMap<String, Fuel>();
+	private ItemStack placeholderItem = new ItemStack(Material.LONG_GRASS, 0, (short)1337);
+	protected List<Craft> craftRecipes = new ArrayList<Craft>();
+	protected List<Combine> combineRecipes = new ArrayList<Combine>();
+	protected HashMap<String, Smelt> smeltRecipes = new HashMap<String, Smelt>();
+	protected HashMap<String, Fuel> fuels = new HashMap<String, Fuel>();
 	
-	private HashMap<String, List<String>>		recipeErrors		= null;
+	private HashMap<String, List<String>> recipeErrors = null;
 //	private List<String>					recipeErrors		= null;
-	private String								currentFile			= null;
-	private int									currentFileLine		= 0;
+	private String currentFile = null;
+	private int urrentFileLine = 0;
 	
-	private int									craftNum			= 0;
-	private int									combineNum			= 0;
-	private boolean								smeltCustomRecipes	= false;
+	private int craftNum = 0;
+	private int combineNum = 0;
+	private boolean	smeltCustomRecipes = false;
 	
-	protected HashMap<String, FurnaceData>		furnaceData			= new HashMap<String, FurnaceData>();
-	protected HashMap<String, MutableDouble>	furnaceSmelting		= new HashMap<String, MutableDouble>();
-	private int									furnaceTaskId		= 0;
+	protected HashMap<String, FurnaceData> furnaceData = new HashMap<String, FurnaceData>();
+	protected HashMap<String, MutableDouble> furnaceSmelting = new HashMap<String, MutableDouble>();
+	private int furnaceTaskId = 0;
 	
-	protected boolean							hasExplosive		= false;
-	private HashSet<String>						overriddenRecipes	= new HashSet<String>();
+	protected boolean hasExplosive = false;
+	private HashSet<String>	overriddenRecipes = new HashSet<String>();
 	
-	private Logger								log;
-	private String								NL					= System.getProperty("line.separator");
+	private Logger og;
+	private String NL = System.getProperty("line.separator");
 	
 	public Recipes()
 	{
